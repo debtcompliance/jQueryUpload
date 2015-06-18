@@ -114,7 +114,8 @@ class jQueryUpload extends SpecialPage {
 			if( $wgJQUploadFileLinkPopup ) {
 				$title = $img->getTitle();
 				$article = new Article( $title );
-				$info = $parser->parse( $article->getContent(), $parser->getTitle(), new ParserOptions(), false, false )->getText();
+				$wikitext = $article->getPage()->getContent()->getNativeData();
+				$info = $parser->parse( $wikitext, $parser->getTitle(), new ParserOptions(), false, false )->getText();
 				if( !empty( $info ) ) $info = '<span class="file-desc">' . $info . '</span>';
 				$date = wfMsg( 'jqueryupload-uploadinfo', $img->user_text, $wgLang->date( $img->timestamp, true ) );
 				$info = '<span class="file-info">' . $date . '</span><br />' . $info;
@@ -556,7 +557,7 @@ class MWUploadHandler extends UploadHandler {
 	 */
 	public static function getUploadedFileInfo( $title ) {
 		$article = new Article( $title );
-		$desc = $article->getContent();
+		$desc = $article->getPage()->getContent()->getNativeData();
 		$dbr = wfGetDB( DB_SLAVE );
 		$row = $dbr->selectRow(
 			'revision',
