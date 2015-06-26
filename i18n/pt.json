@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"jqueryupload": "jQuery File Upload",
+	"jqueryupload-desc": "Permite que arquivos sejam carregados para o wiki ou para páginas específicas, utilizando o módulo jQueryFileUpload",
+	"jqueryupload-attach": "Anexar arquivo",
+	"jqueryupload-attachments": "Arquivo anexos",
+	"jqueryupload-uploadinfo": "Carregado por $1 em $2 às $3",
+	"jqueryupload-enterdesc": "Digite uma breve descrição",
+	"jqueryupload-add": "Adicionar arquivo(s)",
+	"jqueryupload-delsel": "Apagar arquivo(s)",
+	"jqueryupload-del": "Apagar",
+	"jqueryupload-start": "Começar a carga",
+	"jqueryupload-cancel": "Cancelar"
+}
