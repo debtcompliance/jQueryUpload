@@ -1,0 +1,43 @@
+{
+	"name": "jQueryUpload",
+	"version": "1.4.0, 2015-06-26",
+	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]", "[http://blueimp.net Sebastian Tschan]"],
+	"url": "http://www.organicdesign.co.nz/jQueryUpload",
+	"descriptionmsg": "jqueryupload-desc",
+	"license-name": "[https://www.gnu.org/licenses/gpl-2.0.html GNU General Public Licence 2.0] or later",
+	"type": "specialpage",
+	"callback": "jQueryUpload::onRegistration",
+	"AutoloadClasses": {
+		"jQueryUpload": "jQueryUpload_body.php",
+		"UploadHandler": "upload/server/php/upload.class.php",
+		"MWUploadHandler": "MWUploadHandler.php"
+	},
+	"Hooks": {
+		"LanguageGetMagic": ["jQueryUpload::onLanguageGetMagic"],
+	},
+	"config": {
+		"JQUploadIconPrefix": "/icons/Farm-Fresh_file_extension_",
+		"JQUploadFileMagic": "file",
+		"JQUploadFileLinkPopup": true
+	},
+	"ExtensionMessagesFiles": {
+		"jQueryUploadAlias": "jQueryUpload.alias.php"
+	},
+	"MessagesDirs": {
+		"jQueryUpload": ["i18n"]
+	},
+	"ResourceModules": {
+		"ext.jqueryupload": {
+			"scripts": ["modules/jqueryupload.js"],
+			"dependencies": ["mediawiki.util", "jquery.ui.dialog"]
+		}
+	},
+	"@": "Paths calculated at runtime",
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": ""
+	}
+	"SpecialPages": {
+		"jQueryUpload": "jQueryUpload"
+	}
+}
