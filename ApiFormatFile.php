@@ -1,0 +1,51 @@
+<?php
+/**
+ * An API format based on ApiFormatRaw that outputs a file if a filename is set, text if not
+ * - Later the file output can have web-server support like Apache's XSendFile module added
+ */
+
+/**
+ * Formatter that spits out anything you like with any desired MIME type
+ * @ingroup API
+ */
+class ApiFormatFile extends ApiFormatRaw {
+
+	private $errorFallback;
+	private $file = false;
+
+	/**
+	 * @param ApiMain $main
+	 * @param ApiFormatBase $errorFallback Object to fall back on for errors
+	 */
+	public function __construct( ApiMain $main, ApiFormatBase $errorFallback ) {
+		parent::__construct( $main, 'file' );
+		$this->errorFallback = $errorFallback;
+	}
+
+	public function closePrinter() {
+		if ( $this->mDisabled ) {
+			return;
+		}
+		if( $this->file ) {
+			readfile( $this->file );
+		} else {
+			return parent::closePrinter();
+		}
+	}
+
+	public function execute() {
+		$data = $this->getResult()->getResultData();
+		if ( isset( $data['error'] ) ) {
+			$this->errorFallback->execute();
+			return;
+		}
+		if ( isset( $data['file'] ) ) {
+			$this->getResult()->addValue( null, 'mime', mime_content_type( $data['file'] ) );
+			$this->file = $data['file'];
+		} elseif ( isset( $data['text'] ) ) {
+			$this->printText( $data['text'] );
+		} else {
+			ApiBase::dieDebug( __METHOD__, 'No text or file given for file formatter' );
+		}
+	}
+}

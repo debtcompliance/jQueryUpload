@@ -9,6 +9,8 @@
 	"callback": "jQueryUpload::onRegistration",
 	"AutoloadClasses": {
 		"jQueryUpload": "jQueryUpload_body.php",
+		"ApijQueryUpload": "ApijQueryUpload.php",
+		"ApiFormatFile": "ApiFormatFile.php",
 		"UploadHandler": "upload/server/php/upload.class.php",
 		"MWUploadHandler": "MWUploadHandler.php"
 	},

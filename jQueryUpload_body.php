@@ -13,14 +13,15 @@ class jQueryUpload {
 
 	public static $instance = null;
 	public static $desc = array();
+	public static $action = null;
 
 	var $id = 0;
 
 	public static function onRegistration() {
-		global $wgExtensionFunctions, $wgAjaxExportList;
+		global $wgExtensionFunctions, $wgAPIModules;
 
-		// TODO: Ajax handler should be done by API
-		$wgAjaxExportList[] = 'jQueryUpload::server';
+		// Register our API Ajax handler
+		$wgAPIModules['jqu'] = 'ApijQueryUpload';
 
 		// Create a singleton instance
 		self::$instance = new self();
@@ -29,8 +30,8 @@ class jQueryUpload {
 		// If the query-string arg mwaction is supplied, rename action and change mwaction to action
 		// - this hack was required because the jQueryUpload module uses the name "action" too
 		if( array_key_exists( 'mwaction', $_REQUEST ) ) {
-			$wgJQUploadAction = array_key_exists( 'action', $_REQUEST ) ? $_REQUEST['action'] : false;
-			$_REQUEST['action'] = $_GET['action'] = $_POST['action'] = $_REQUEST['mwaction'];
+			self::$action = array_key_exists( 'action', $_REQUEST ) ? $_REQUEST['action'] : false;
+			$_REQUEST['action'] = $_GET['action'] = $_POST['action'] = 'jqu';
 		}
 	}
 
@@ -158,127 +159,6 @@ class jQueryUpload {
 		global $wgJQUploadFileMagic;
 		$magicWords[$wgJQUploadFileMagic] = array( 0, $wgJQUploadFileMagic );
 		return true;
-	}
-
-	/**
-	 * Ajax handler encapsulate jQueryUpload server-side functionality
-	 */
-	public static function server() {
-		global $wgScript, $wgUploadDirectory, $wgJQUploadAction, $wgRequest, $wgFileExtensions;
-		if( $wgJQUploadAction ) $_REQUEST['action'] = $wgJQUploadAction;
-
-		// So that meaningful errors can be sent back to the client
-		error_reporting( E_ALL | E_STRICT );
-
-		// But turn off error output as warnings can break the json syntax
-		ini_set("display_errors", "off");
-
-		header( 'Pragma: no-cache' );
-		header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-
-		// If there are args, then this is a file or thumbnail request
-		if( $n = func_num_args() ) {
-			global $wgUser;
-			$a = func_get_args();
-
-			// Only return the file if the user is logged in
-			if( !$wgUser->isLoggedIn() ) return false;
-
-			// Get the file or thumb location
-			if( $a[0] == 'thumb' ) {
-				array_shift( $a );
-				$path = $n == 3 ? array_shift( $a ) . '/' : '';
-				$name = self::thumbFilename( "thumb/$a[0]" );
-				$file = "$wgUploadDirectory/jquery_upload_files/$path$name";
-			}
-
-			else {
-				$path = $n == 2 ? array_shift( $a ) . '/' : '';
-				$name = $a[0];
-				$file = "$wgUploadDirectory/jquery_upload_files/$path$name";
-			}
-
-			// Set the headers, output the file and bail
-			header( "Content-Type: " . mime_content_type( $file ) );
-			header( "Content-Length: " . filesize( $file ) );
-			header( "Content-Disposition: inline; filename=\"$name\"" );
-			//header( "Content-Transfer-Encoding: binary" );   IE was not rendering PDF's inline with this header included
-			header( "Pragma: private" );
-			readfile( $file );
-			return '';
-		}
-
-		header( 'Content-Disposition: inline; filename="files.json"' );
-		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Access-Control-Allow-Origin: *' );
-		header( 'Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE' );
-		header( 'Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size' );
-
-		// Process the rename and desc text inputs added to the upload form rows
-		if( array_key_exists( 'upload_rename_from', $_REQUEST ) && array_key_exists( 'files', $_FILES ) ) {
-			foreach( $_REQUEST['upload_rename_from'] as $i => $from ) {
-				if( false !== $j = array_search( $from, $_FILES['files']['name'] ) ) {
-					$ext = pathinfo( $from, PATHINFO_EXTENSION );
-					$name = $_REQUEST['upload_rename_to'][$i] . ".$ext";
-					$_FILES['files']['name'][$j] = $name;
-					self::$desc[$name] = $_REQUEST['upload_desc'][$i];
-				}
-			}
-		}
-
-		// Get the file locations
-		$path = $wgRequest->getText( 'path', '' );
-		$dir = "$wgUploadDirectory/jquery_upload_files/$path";
-		if( $path ) $dir .= '/';
-		$thm = $dir . 'thumb/';
-		$meta = $dir . 'meta/';
-
-		// Set the initial options for the upload file object
-		$url = "$wgScript?action=ajax&rs=jQueryUpload::server";
-		if( $path ) $path = "&rsargs[]=$path";
-		$upload_options = array(
-			'script_url' => $url,
-			'upload_dir' => $dir,
-			'upload_url' => "$url$path&rsargs[]=",
-			'accept_file_types' => '/(' . implode( '|', $wgFileExtensions ) . ')/i',
-			'delete_type' => 'POST',
-			'max_file_size' => 50000000,
-			'image_versions' => array(
-				'thumbnail' => array(
-					'upload_dir' => $thm,
-					'upload_url' => "$url&rsargs[]=thumb$path&rsargs[]=",
-					'max_width' => 80,
-					'max_height' => 80
-				)
-			)
-		);
-
-		// Create the file upload object
-		$upload_handler = new MWUploadHandler( $upload_options );
-
-		// Call the appropriate method based on the request
-		switch( $_SERVER['REQUEST_METHOD'] ) {
-			case 'OPTIONS':
-				break;
-			case 'HEAD':
-			case 'GET':
-				$upload_handler->get();
-				break;
-			case 'POST':
-
-				// Create the directories if they don't exist (we do it here so they're not created for every dir read)
-				if( !is_dir( "$wgUploadDirectory/jquery_upload_files" ) ) mkdir( "$wgUploadDirectory/jquery_upload_files" );
-				if( !is_dir( $dir ) ) mkdir( $dir );
-				if( !is_dir( $thm ) ) mkdir( $thm );
-				if( !is_dir( $meta ) ) mkdir( $meta );
-
-				$upload_handler->post();
-				break;
-			default:
-				header( 'HTTP/1.1 405 Method Not Allowed' );
-		}
-
-		return '';
 	}
 
 	function head() {
