@@ -9,21 +9,22 @@
  * @author Aran Dunkley (http://www.organicdesign.co.nz/nad)
  *
  */
-class jQueryUpload extends SpecialPage {
+class jQueryUpload {
 
 	public static $instance = null;
 	public static $desc = array();
 
 	var $id = 0;
 
-	public static function {
-		global $wgAjaxExportList;
+	public static function onRegistration() {
+		global $wgExtensionFunctions, $wgAjaxExportList;
 
 		// TODO: Ajax handler should be done by API
 		$wgAjaxExportList[] = 'jQueryUpload::server';
 
 		// Create a singleton instance
 		self::$instance = new self();
+		$wgExtensionFunctions[] = array( self::$instance, 'setup' );
 
 		// If the query-string arg mwaction is supplied, rename action and change mwaction to action
 		// - this hack was required because the jQueryUpload module uses the name "action" too
@@ -31,14 +32,10 @@ class jQueryUpload extends SpecialPage {
 			$wgJQUploadAction = array_key_exists( 'action', $_REQUEST ) ? $_REQUEST['action'] : false;
 			$_REQUEST['action'] = $_GET['action'] = $_POST['action'] = $_REQUEST['mwaction'];
 		}
-
 	}
 
-	function __construct() {
-		global $wgOut, $wgExtensionAssetsPath, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic;
-
-		// Initialise the special page
-		parent::__construct( 'jQueryUpload', 'upload' );
+	public function setup() {
+		global $wgOut, $wgExtensionAssetsPath, $IP, $wgResourceModules, $wgAutoloadClasses, $wgHooks, $wgParser, $wgJQUploadFileMagic;
 
 		// If attachments allowed in this page, add the module into the page
 		if( $title = array_key_exists( 'title', $_GET ) ? Title::newFromText( $_GET['title'] ) : false )
@@ -64,18 +61,6 @@ class jQueryUpload extends SpecialPage {
 		$wgResourceModules['ext.jqueryupload']['remoteExtPath'] = $path;
 		$wgOut->addModules( 'ext.jqueryupload' );
 		$wgOut->addStyle( "$path/styles/jqueryupload.css" );
-	}
-
-	/**
-	 * Render the special page
-	 */
-	function execute( $param ) {
-		global $wgOut, $wgResourceModules, $wgExtensionAssetsPath;
-		$this->setHeaders();
-		$this->head();
-		$wgOut->addHtml( $this->form() );
-		$wgOut->addHtml( $this->templates() );
-		$wgOut->addHtml( $this->scripts() );
 	}
 
 	/**

@@ -13,7 +13,7 @@
 		"MWUploadHandler": "MWUploadHandler.php"
 	},
 	"Hooks": {
-		"LanguageGetMagic": ["jQueryUpload::onLanguageGetMagic"],
+		"LanguageGetMagic": ["jQueryUpload::onLanguageGetMagic"]
 	},
 	"config": {
 		"JQUploadIconPrefix": "/icons/Farm-Fresh_file_extension_",
@@ -36,8 +36,5 @@
 	"ResourceFileModulePaths": {
 		"localBasePath": "",
 		"remoteExtPath": ""
-	}
-	"SpecialPages": {
-		"jQueryUpload": "jQueryUpload"
 	}
 }
