@@ -125,12 +125,12 @@ class jQueryUpload {
 
 		// Not local, check if it's a jQuery one
 		if( $href === false ) {
-			global $wgUploadDirectory, $wgScript;
+			global $wgUploadDirectory, $wgScriptPath;
 			if( $glob = glob( "$wgUploadDirectory/jquery_upload_files/*/$filename" ) ) {
 				if( preg_match( "|jquery_upload_files/(\d+)/|", $glob[0], $m ) ) {
 					$path = $m[1];
 					$class = ' jquery-file';
-					$href = "$wgScript?action=ajax&rs=jQueryUpload::server&rsargs[]=$path&rsargs[]=" . urlencode( $filename );
+					$href = "$wgScriptPath/api.php?action=jqu&rsargs[]=$path&rsargs[]=" . urlencode( $filename );
 					if( $wgJQUploadFileLinkPopup ) {
 						$meta = "$wgUploadDirectory/jquery_upload_files/$path/meta/$filename";
 						if( file_exists( $meta ) ) {
@@ -239,10 +239,10 @@ class jQueryUpload {
 	}
 
 	function form() {
-		global $wgScript, $wgTitle;
+		global $wgScriptPath, $wgTitle;
 		if( $this->id === false ) $this->id = $wgTitle->getArticleID();
 		$path = ( is_object( $wgTitle ) && $this->id ) ? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />" : '';
-		return '<form id="fileupload" action="' . $wgScript . '" method="POST" enctype="multipart/form-data">
+		return '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">
 			<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
 			<div class="row fileupload-buttonbar">
 				<div class="span7">
@@ -281,8 +281,7 @@ class jQueryUpload {
 			<br>
 			<!-- The table listing the files available for upload/download -->
 			<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-			<input type="hidden" name="mwaction" value="ajax" />
-			<input type="hidden" name="rs" value="jQueryUpload::server" />' . $path . '
+			<input type="hidden" name="mwaction" value="jqu" />' . $path . '
 		</form>';
 	}
 

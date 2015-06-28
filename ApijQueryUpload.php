@@ -3,7 +3,7 @@
  * API module for jQueryUpload extension
  * @ingroup API
  */
-class ApiDcsExportTerms extends ApiBase {
+class ApijQueryUpload extends ApiBase {
 
 	public function execute() {
 		global $wgScript, $wgUploadDirectory, $wgRequest, $wgFileExtensions;
@@ -45,7 +45,7 @@ class ApiDcsExportTerms extends ApiBase {
 			header( "Content-Disposition: inline; filename=\"$name\"" );
 			//header( "Content-Transfer-Encoding: binary" );   IE was not rendering PDF's inline with this header included
 			header( "Pragma: private" );
-			$this->getResult()->addValue( null, 'file' => $file );
+			$this->getResult()->addValue( null, $this->getModuleName(), array( 'file' => $file ) );
 			return;
 		}
 
@@ -95,7 +95,7 @@ class ApiDcsExportTerms extends ApiBase {
 		);
 
 		// jQueryUpload module expects the action parameter to be populated with it's own action, not the API action
-		$_REQUEST['action'] = self::$action;
+		$_REQUEST['action'] = jQueryUpload::$action;
 
 		// Create the file upload object
 		$upload_handler = new MWUploadHandler( $upload_options );
@@ -127,7 +127,7 @@ class ApiDcsExportTerms extends ApiBase {
 
 		// Store the buffered output in the result
 		ob_end_clean();
-		$this->getResult()->addValue( null, 'text' => ob_get_contents() );
+		$this->getResult()->addValue( null, $this->getModuleName(), array( 'text' => ob_get_contents() ) );
 		return;
 	}
 
@@ -135,7 +135,7 @@ class ApiDcsExportTerms extends ApiBase {
 	 * This API should return plain text
 	 */
 	public function getCustomPrinter() {
-		return new ApiFormatRaw( $this->getMain(), $this->getMain()->createPrinterByName( 'jsonfm' ) );
+		return new ApiFormatFile( $this->getMain(), $this->getMain()->createPrinterByName( 'jsonfm' ) );
 	}
 
 	public function mustBePosted() {
@@ -143,12 +143,12 @@ class ApiDcsExportTerms extends ApiBase {
 	}
 
 	/**
-	 * Parameters are varied depending on the job type, so we just add all keys in the request
+	 * Just allow any params for now (by adding the keys in $_REQUEST to the allowed params)
 	 */
 	public function getAllowedParams() {
-		return array(
-			'type' => array( ApiBase::PARAM_TYPE => 'string', ApiBase::PARAM_REQUIRED => true ),
-			'title' => array( ApiBase::PARAM_TYPE => 'string' )
-		);
+		foreach( array_keys( $_REQUEST ) as $k ) {
+			$params[$k] = array( ApiBase::PARAM_TYPE => 'string' );
+		}
+		return $params;
 	}
 }

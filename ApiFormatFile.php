@@ -8,18 +8,37 @@
  * Formatter that spits out anything you like with any desired MIME type
  * @ingroup API
  */
-class ApiFormatFile extends ApiFormatRaw {
+class ApiFormatFile extends ApiFormatBase {
 
 	private $errorFallback;
 	private $file = false;
 
-	/**
-	 * @param ApiMain $main
-	 * @param ApiFormatBase $errorFallback Object to fall back on for errors
-	 */
 	public function __construct( ApiMain $main, ApiFormatBase $errorFallback ) {
 		parent::__construct( $main, 'file' );
 		$this->errorFallback = $errorFallback;
+	}
+
+	public function getMimeType() {
+		$data = $this->getResult()->getResultData();
+
+		if ( isset( $data['error'] ) ) {
+			return $this->errorFallback->getMimeType();
+		}
+
+		if ( !isset( $data['mime'] ) ) {
+			ApiBase::dieDebug( __METHOD__, 'No MIME type set for file formatter' );
+		}
+
+		return $data['mime'];
+	}
+
+	public function initPrinter( $unused = false ) {
+		$data = $this->getResult()->getResultData();
+		if ( isset( $data['error'] ) ) {
+			$this->errorFallback->initPrinter( $unused );
+		} else {
+			parent::initPrinter( $unused );
+		}
 	}
 
 	public function closePrinter() {

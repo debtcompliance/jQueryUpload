@@ -36,7 +36,7 @@ $(function() {
 		path = path ? '&path=' + path : '';
 		$('#fileupload').each(function () {
 			var that = this;
-			$.getJSON('?action=ajax' + path + '&rs=jQueryUpload::server', function(result) {
+			$.getJSON(mw.util.wikiScript('api') + '?action=jqu' + path, function(result) {
 				if(result && result.length) {
 					$(that).fileupload('option', 'done').call(that, null, {result: result});
 				}
