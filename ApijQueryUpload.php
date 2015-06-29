@@ -6,8 +6,11 @@
 class ApijQueryUpload extends ApiBase {
 
 	public function execute() {
-		global $wgScript, $wgUploadDirectory, $wgRequest, $wgFileExtensions;
+		global $wgScriptPath, $wgUploadDirectory, $wgRequest, $wgFileExtensions;
 		$params = $this->extractRequestParams();
+		$thumb = $params['thumb'];
+		$path = $params['path'];
+		$name = $params['name'];
 
 		// So that meaningful errors can be sent back to the client
 		error_reporting( E_ALL | E_STRICT );
@@ -18,34 +21,25 @@ class ApijQueryUpload extends ApiBase {
 		header( 'Pragma: no-cache' );
 		header( 'Cache-Control: no-store, no-cache, must-revalidate' );
 
-		// If there are args, then this is a file or thumbnail request
-		if( $n = func_num_args() ) {
+		// If a file name is supplied, then this is a file or thumbnail request
+		if( $name ) {
 			global $wgUser;
-			$a = func_get_args();
 
 			// Only return the file if the user is logged in
 			if( !$wgUser->isLoggedIn() ) ApiBase::dieDebug( __METHOD__, 'Not logged in' );
 
 			// Get the file or thumb location
-			if( $a[0] == 'thumb' ) {
-				array_shift( $a );
-				$path = $n == 3 ? array_shift( $a ) . '/' : '';
-				$name = jQueryUpload::thumbFilename( "thumb/$a[0]" );
-				$file = "$wgUploadDirectory/jquery_upload_files/$path$name";
-			}
-
-			else {
-				$path = $n == 2 ? array_shift( $a ) . '/' : '';
-				$name = $a[0];
-				$file = "$wgUploadDirectory/jquery_upload_files/$path$name";
-			}
+			if( $thumb ) $name = jQueryUpload::thumbFilename( "thumb/$name" );
+			$file = "$wgUploadDirectory/jquery_upload_files/$path/$name";
 
 			// Set the headers, output the file and bail
 			header( "Content-Length: " . filesize( $file ) );
 			header( "Content-Disposition: inline; filename=\"$name\"" );
 			//header( "Content-Transfer-Encoding: binary" );   IE was not rendering PDF's inline with this header included
 			header( "Pragma: private" );
-			$this->getResult()->addValue( null, $this->getModuleName(), array( 'file' => $file ) );
+
+			$this->getResult()->addValue( null, 'file', $file );
+			$this->getResult()->addValue( null, 'mime', mime_content_type( $file ) );
 			return;
 		}
 
@@ -68,7 +62,6 @@ class ApijQueryUpload extends ApiBase {
 		}
 
 		// Get the file locations
-		$path = $wgRequest->getText( 'path', '' );
 		$dir = "$wgUploadDirectory/jquery_upload_files/$path";
 		if( $path ) $dir .= '/';
 		$thm = $dir . 'thumb/';
@@ -76,18 +69,18 @@ class ApijQueryUpload extends ApiBase {
 
 		// Set the initial options for the upload file object
 		$url = "$wgScriptPath/api.php?action=jqu";
-		if( $path ) $path = "&rsargs[]=$path";
+		if( $path ) $url .= "&path=$path";
 		$upload_options = array(
 			'script_url' => $url,
 			'upload_dir' => $dir,
-			'upload_url' => "$url$path&rsargs[]=",
+			'upload_url' => "$url&name=",
 			'accept_file_types' => '/(' . implode( '|', $wgFileExtensions ) . ')/i',
 			'delete_type' => 'POST',
 			'max_file_size' => 50000000,
 			'image_versions' => array(
 				'thumbnail' => array(
 					'upload_dir' => $thm,
-					'upload_url' => "$url&rsargs[]=thumb$path&rsargs[]=",
+					'upload_url' => "$url&thumb=1&name=",
 					'max_width' => 80,
 					'max_height' => 80
 				)
@@ -126,8 +119,13 @@ class ApijQueryUpload extends ApiBase {
 		}
 
 		// Store the buffered output in the result
+		$this->getResult()->addValue( null, 'text', ob_get_contents() );
 		ob_end_clean();
-		$this->getResult()->addValue( null, $this->getModuleName(), array( 'text' => ob_get_contents() ) );
+
+		// API needs a MIME type set, so we'll populate it from the existing header
+		$mime = preg_match( '%^Content-type: (.+?)$%m', implode( "\n", headers_list() ), $m ) ? $m[1] : 'text/plain';
+		$this->getResult()->addValue( null, 'mime', $mime );
+
 		return;
 	}
 
@@ -149,6 +147,9 @@ class ApijQueryUpload extends ApiBase {
 		foreach( array_keys( $_REQUEST ) as $k ) {
 			$params[$k] = array( ApiBase::PARAM_TYPE => 'string' );
 		}
+		$params['thumb'] = array( ApiBase::PARAM_TYPE => 'boolean' );
+		$params['path'] = array( ApiBase::PARAM_TYPE => 'string' );
+		$params['name'] = array( ApiBase::PARAM_TYPE => 'string' );
 		return $params;
 	}
 }

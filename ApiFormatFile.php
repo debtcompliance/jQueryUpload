@@ -42,7 +42,7 @@ class ApiFormatFile extends ApiFormatBase {
 	}
 
 	public function closePrinter() {
-		if ( $this->mDisabled ) {
+		if ( $this->isDisabled() ) {
 			return;
 		}
 		if( $this->file ) {
@@ -59,7 +59,6 @@ class ApiFormatFile extends ApiFormatBase {
 			return;
 		}
 		if ( isset( $data['file'] ) ) {
-			$this->getResult()->addValue( null, 'mime', mime_content_type( $data['file'] ) );
 			$this->file = $data['file'];
 		} elseif ( isset( $data['text'] ) ) {
 			$this->printText( $data['text'] );

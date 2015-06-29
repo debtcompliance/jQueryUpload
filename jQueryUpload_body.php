@@ -353,5 +353,4 @@ class jQueryUpload {
 		{% } %}
 		</script>';
 	}
-
 }
