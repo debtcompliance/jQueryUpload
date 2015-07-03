@@ -46,11 +46,13 @@ class ApiFormatFile extends ApiFormatBase {
 			return;
 		}
 		if( $this->file ) {
+			ob_clean();
 			readfile( $this->file );
 		} else {
 			return parent::closePrinter();
 		}
 	}
+
 
 	public function execute() {
 		$data = $this->getResult()->getResultData();
