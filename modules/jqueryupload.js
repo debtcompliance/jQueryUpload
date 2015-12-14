@@ -15,7 +15,7 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
-
+			
 $(function() {
 	'use strict';
 
@@ -67,7 +67,16 @@ $(function() {
 			}).parent().css('left',a.position().left+20).css('top',a.position().top+15);
 		}
 	});
-
 });
 
+window.uploadRenameBase = function(name) {
+	var re = /^(.+)(\..+?)$/;
+	var m = re.exec(name);
+	return m[1];
+};
 
+window.uploadRenameExt = function(name) {
+	var re = /^(.+)(\..+?)$/;
+	var m = re.exec(name);
+	return m[2];
+};

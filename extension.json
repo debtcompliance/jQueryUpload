@@ -1,6 +1,6 @@
 {
 	"name": "jQueryUpload",
-	"version": "1.4.0, 2015-06-26",
+	"version": "1.4.1, 2015-12-14",
 	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]", "[http://blueimp.net Sebastian Tschan]"],
 	"url": "http://www.organicdesign.co.nz/jQueryUpload",
 	"descriptionmsg": "jqueryupload-desc",
@@ -30,8 +30,21 @@
 	},
 	"ResourceModules": {
 		"ext.jqueryupload": {
-			"scripts": ["modules/jqueryupload.js"],
-			"dependencies": ["mediawiki.util", "jquery.ui.dialog"]
+			"scripts": [
+				"modules/jqueryupload.js",
+				"blueimp/JavaScript-Templates/tmpl.min.js",
+				"blueimp/JavaScript-Load-Image/load-image.min.js",
+				"blueimp/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js",
+				"blueimp/cdn/js/bootstrap.min.js",
+				"blueimp/Bootstrap-Image-Gallery/js/bootstrap-image-gallery.min.js",
+				"upload/js/jquery.iframe-transport.js",
+				"upload/js/jquery.fileupload.js",
+				"upload/js/jquery.fileupload-fp.js",
+				"upload/js/jquery.fileupload-ui.js",
+				"upload/js/locale.js",
+				"upload/js/cors/jquery.xdr-transport.js"
+			],
+			"dependencies": ["mediawiki.util", "jquery.ui.dialog", "jquery.ui.widget"]
 		}
 	},
 	"@": "Paths calculated at runtime",

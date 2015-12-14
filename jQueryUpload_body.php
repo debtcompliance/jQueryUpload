@@ -14,6 +14,7 @@ class jQueryUpload {
 	public static $instance = null;
 	public static $desc = array();
 	public static $action = null;
+	public static $path;
 
 	var $id = 0;
 
@@ -36,7 +37,10 @@ class jQueryUpload {
 	}
 
 	public function setup() {
-		global $wgOut, $wgExtensionAssetsPath, $IP, $wgResourceModules, $wgAutoloadClasses, $wgHooks, $wgParser, $wgJQUploadFileMagic;
+		global $wgOut, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath, $wgAutoloadClasses;
+
+		// Calculate the base path of the extension files accounting for symlinks
+		self::$path = $wgExtensionAssetsPath . str_replace( "$IP/extensions", '', dirname( $wgAutoloadClasses[__CLASS__] ) );
 
 		// If attachments allowed in this page, add the module into the page
 		if( $title = array_key_exists( 'title', $_GET ) ? Title::newFromText( $_GET['title'] ) : false )
@@ -58,10 +62,9 @@ class jQueryUpload {
 		}
 
 		// Add the extensions own js
-		$path = $wgExtensionAssetsPath . str_replace( "$IP/extensions", '', dirname( $wgAutoloadClasses[__CLASS__] ) );
-		$wgResourceModules['ext.jqueryupload']['remoteExtPath'] = $path;
+		$wgResourceModules['ext.jqueryupload']['remoteExtPath'] = self::$path;
 		$wgOut->addModules( 'ext.jqueryupload' );
-		$wgOut->addStyle( "$path/styles/jqueryupload.css" );
+		$wgOut->addStyle( self::$path . '/styles/jqueryupload.css' );
 	}
 
 	/**
@@ -71,7 +74,6 @@ class jQueryUpload {
 		$out->addHtml( '<h2 class="jqueryupload">' . wfMessage( 'jqueryupload-attachments' )->text() . '</h2>' );
 		$out->addHtml( $this->form() );
 		$out->addHtml( $this->templates() );
-		$out->addHtml( $this->scripts() );
 		return true;
 	}
 
@@ -143,11 +145,7 @@ class jQueryUpload {
 			}
 		}
 
-		if( $href === false ) {
-			$class = ' redlink';
-		}
-
-		//$title = empty( $info ) ? " title=\"$filename\"" : '';
+		if( $href === false ) $class = ' redlink';
 		if( !empty( $info ) ) $info = "<span style=\"display:none\">$info</span>";
 		return "<span class=\"jqu-span\"><span class=\"plainlinks$class\" title=\"$href\">$anchor$info</span></span>";
 	}
@@ -162,15 +160,9 @@ class jQueryUpload {
 	}
 
 	function head() {
-		global $wgOut, $wgExtensionAssetsPath;
-		$base = $wgExtensionAssetsPath . '/' . basename( dirname( __FILE__ ) );
-		$css = "$base/upload/css";
+		global $wgOut;
+		$css = self::$path . '/upload/css';
 
-		// Bootstrap CSS Toolkit styles
-//		$wgOut->addStyle( "$base/jqueryupload.css", 'screen' );
-
-		// Bootstrap styles for responsive website layout, supporting different screen sizes
-		//$wgOut->addStyle( 'http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css', 'screen' );
 		// CSS to style the file input field as button and adjust the Bootstrap progress bars
 		$wgOut->addStyle( "$css/jquery.fileupload-ui.css", 'screen' );
 
@@ -182,60 +174,6 @@ class jQueryUpload {
 
 		// Set the ID to use for images on this page (defaults to article ID)
 		$wgOut->addJsConfigVars( 'jQueryUploadID', $this->id );
-	}
-
-	function scripts() {
-		global $wgExtensionAssetsPath;
-		$base = $wgExtensionAssetsPath . '/' . basename( dirname( __FILE__ ) );
-		$js = "$base/upload/js";
-		$blueimp = "$base/blueimp";
-		$script = "<script src=\"$js/vendor/jquery.ui.widget.js\"></script>\n";
-
-		// The Templates plugin is included to render the upload/download listings
-		$script .= "<script src=\"$blueimp/JavaScript-Templates/tmpl.min.js\"></script>\n";
-
-		// The Load Image plugin is included for the preview images and image resizing functionality
-		$script .= "<script src=\"$blueimp/JavaScript-Load-Image/load-image.min.js\"></script>\n";
-
-		// The Canvas to Blob plugin is included for image resizing functionality
-		$script .= "<script src=\"$blueimp/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js\"></script>\n";
-
-		// Bootstrap JS and Bootstrap Image Gallery are not required, but included for the demo
-		$script .= "<script src=\"$blueimp/cdn/js/bootstrap.min.js\"></script>\n";
-		$script .= "<script src=\"$blueimp/Bootstrap-Image-Gallery/js/bootstrap-image-gallery.min.js\"></script>\n";
-
-		// The Iframe Transport is required for browsers without support for XHR file uploads
-		$script .= "<script src=\"$js/jquery.iframe-transport.js\"></script>\n";
-
-		// The basic File Upload plugin
-		$script .= "<script src=\"$js/jquery.fileupload.js\"></script>\n";
-
-		// The File Upload file processing plugin
-		$script .= "<script src=\"$js/jquery.fileupload-fp.js\"></script>\n";
-
-		// The File Upload user interface plugin
-		$script .= "<script src=\"$js/jquery.fileupload-ui.js\"></script>\n";
-
-		// The localization script
-		$script .= "<script src=\"$js/locale.js\"></script>\n";
-
-		// The XDomainRequest Transport is included for cross-domain file deletion for IE8+
-		$script .= "<!--[if gte IE 8]><script src=\"$js/cors/jquery.xdr-transport.js\"></script><![endif]-->\n";
-
-		// Functions added for allowing uploaded files to be renamed
-		$script .= "<script>
-			function uploadRenameBase(name) {
-				var re = /^(.+)(\..+?)$/;
-				var m = re.exec(name);
-				return m[1];
-			}
-			function uploadRenameExt(name) {
-				var re = /^(.+)(\..+?)$/;
-				var m = re.exec(name);
-				return m[2];
-			}</script>\n";
-
-		return $script;
 	}
 
 	function form() {
