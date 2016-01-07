@@ -31,7 +31,6 @@
 	"ResourceModules": {
 		"ext.jqueryupload": {
 			"scripts": [
-				"modules/jqueryupload.js",
 				"blueimp/JavaScript-Templates/tmpl.min.js",
 				"blueimp/JavaScript-Load-Image/load-image.min.js",
 				"blueimp/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js",
@@ -42,7 +41,8 @@
 				"upload/js/jquery.fileupload-fp.js",
 				"upload/js/jquery.fileupload-ui.js",
 				"upload/js/locale.js",
-				"upload/js/cors/jquery.xdr-transport.js"
+				"upload/js/cors/jquery.xdr-transport.js",
+				"modules/jqueryupload.js"
 			],
 			"dependencies": ["mediawiki.util", "jquery.ui.dialog", "jquery.ui.widget"]
 		}
