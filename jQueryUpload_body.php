@@ -82,10 +82,12 @@ class jQueryUpload {
 	 */
 	public static function icon( $file ) {
 		global $IP, $wgJQUploadIconPrefix;
-		$ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
-		$prefix = $wgJQUploadIconPrefix ? $wgJQUploadIconPrefix : "$IP/skins/common/images/icons/fileicon-";
-		$icon = "$prefix$ext.png";
-		if( !file_exists( $icon ) ) $icon = preg_replace( '|[-_]$|', '', $prefix ) . '.png';
+		if( $ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) ) ) {
+			$prefix = $wgJQUploadIconPrefix ? $wgJQUploadIconPrefix : "$IP/skins/common/images/icons/fileicon-";
+			$icon = __DIR__ . "$prefix$ext.png";
+			file_put_contents( '/var/www/dcs/debug.log', "Icon for \"$file\": $icon", FILE_APPEND );
+			if( !file_exists( $icon ) ) $icon = preg_replace( '|[-_]$|', '', $prefix ) . '.png';
+		} else $icon = '';
 		return $icon;
 	}
 
