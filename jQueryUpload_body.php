@@ -132,7 +132,7 @@ class jQueryUpload {
 				if( preg_match( "|jquery_upload_files/(\d+)/|", $glob[0], $m ) ) {
 					$path = $m[1];
 					$class = ' jquery-file';
-					$href = "$wgScriptPath/api.php?action=jqu&rsargs[]=$path&rsargs[]=" . urlencode( $filename );
+					$href = self::fileUrl( $path, $filename );
 					if( $wgJQUploadFileLinkPopup ) {
 						$meta = "$wgUploadDirectory/jquery_upload_files/$path/meta/$filename";
 						if( file_exists( $meta ) ) {
@@ -159,7 +159,15 @@ class jQueryUpload {
 		return true;
 	}
 
-	function head() {
+	/**
+	 * Return the external URL for the passed path (page id) and file
+	 */
+	public static function fileUrl( $path, $name ) {
+		global $wgScriptPath;
+		return "$wgScriptPath/api.php?action=jqu&path=$path&name=" . urlencode( $name );
+	}
+
+	private function head() {
 		global $wgOut;
 		$css = self::$path . '/upload/css';
 
@@ -176,7 +184,7 @@ class jQueryUpload {
 		$wgOut->addJsConfigVars( 'jQueryUploadID', $this->id );
 	}
 
-	function form() {
+	private function form() {
 		global $wgScriptPath, $wgTitle;
 		if( $this->id === false ) $this->id = $wgTitle->getArticleID();
 		$path = ( is_object( $wgTitle ) && $this->id ) ? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />" : '';
@@ -223,7 +231,7 @@ class jQueryUpload {
 		</form>';
 	}
 
-	function templates() {
+	private function templates() {
 		return '<!-- The template to display files available for upload -->
 		<script id="template-upload" type="text/x-tmpl">
 		{% for (var i=0, file; file=o.files[i]; i++) { %}
