@@ -73,7 +73,7 @@ class MWUploadHandler extends UploadHandler {
 		if( empty( $name ) ) $name = $user->getName();
 		$d = $wgContLang->userDate( $data[1], $wgUser );
 		$t = $wgContLang->userTime( $data[1], $wgUser );
-		return wfMsg( 'jqueryupload-uploadinfo', $name, $d, $t );
+		return wfMessage( 'jqueryupload-uploadinfo', $name, $d, $t );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class MWUploadHandler extends UploadHandler {
 				global $wgUser;
 				$desc = jQueryUpload::$desc[$file->name];
 				$meta = $this->options['upload_dir'] . 'meta/' . $file->name;
-				$data = array( $wgUser->getID(), time(), $desc == wfMsg( 'jqueryupload-enterdesc' ) ? '' : $desc );
+				$data = array( $wgUser->getID(), time(), $desc == wfMessage( 'jqueryupload-enterdesc' ) ? '' : $desc );
 				file_put_contents( $meta, serialize( $data ) );
 			}
 		}

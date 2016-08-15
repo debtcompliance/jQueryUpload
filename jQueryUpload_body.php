@@ -19,43 +19,42 @@ class jQueryUpload {
 	var $id = 0;
 
 	public static function onRegistration() {
-		global $wgExtensionFunctions, $wgAPIModules;
+		global $wgExtensionFunctions, $wgAPIModules, $wgJQUaction;
+
 
 		// Register our API Ajax handler
 		$wgAPIModules['jqu'] = 'ApijQueryUpload';
 
 		// Create a singleton instance
 		self::$instance = new self();
-		$wgExtensionFunctions[] = array( self::$instance, 'setup' );
 
-		// If the query-string arg mwaction is supplied, rename action and change mwaction to action
-		// - this hack was required because the jQueryUpload module uses the name "action" too
-		if( array_key_exists( 'mwaction', $_REQUEST ) ) {
-			self::$action = array_key_exists( 'action', $_REQUEST ) ? $_REQUEST['action'] : false;
-			$_REQUEST['action'] = $_GET['action'] = $_POST['action'] = 'jqu';
-		}
+		// Horrible hack
+		self::$action = $wgJQUaction;
+
+		// Do the rest of the setup after user and title are ready
+		Hooks::register( 'UserGetRights', self::$instance );
 	}
 
-	public function setup() {
-		global $wgOut, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath, $wgAutoloadClasses;
+	// Using this hook for setup so that user and title are setup
+	public function onUserGetRights( $user, &$rights ) {
+		global $wgOut, $wgTitle, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath, $wgAutoloadClasses;
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = $wgExtensionAssetsPath . str_replace( "$IP/extensions", '', dirname( $wgAutoloadClasses[__CLASS__] ) );
 
 		// If attachments allowed in this page, add the module into the page
-		if( $title = array_key_exists( 'title', $_GET ) ? Title::newFromText( $_GET['title'] ) : false )
-			$this->id = $title->getArticleID();
+		if( is_object( $wgTitle ) ) $this->id = $wgTitle->getArticleID();
 
 		// Set up the #file parser-function
 		$wgParser->setFunctionHook( $wgJQUploadFileMagic, array( $this, 'expandFile' ), SFH_NO_HASH );
 
 		// Allow overriding of the file ID
-		Hooks::run( 'jQueryUploadSetId', array( $title, &$this->id ) );
+		Hooks::run( 'jQueryUploadSetId', array( $wgTitle, &$this->id ) );
 
 		// If attachments allowed in this page, add the module into the page
-		$attach = is_object( $title ) && $this->id && !$title->isRedirect()
-			&& !array_key_exists( 'action', $_REQUEST ) && $title->getNamespace() != 6;
-		if( $attach ) Hooks::run( 'jQueryUploadAddAttachLink', array( $title, &$attach ) );
+		$attach = is_object( $wgTitle ) && $this->id && !$wgTitle->isRedirect()
+			&& !array_key_exists( 'action', $_REQUEST ) && $wgTitle->getNamespace() != 6;
+		if( $attach ) Hooks::run( 'jQueryUploadAddAttachLink', array( $wgTitle, &$attach ) );
 		if( $attach ) {
 			$this->head();
 			$wgHooks['BeforePageDisplay'][] = $this;
