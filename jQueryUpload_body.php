@@ -122,7 +122,7 @@ class jQueryUpload {
 				$wikitext = $article->getPage()->getContent()->getNativeData();
 				$info = $parser->parse( $wikitext, $parser->getTitle(), new ParserOptions(), false, false )->getText();
 				if( !empty( $info ) ) $info = '<span class="file-desc">' . $info . '</span>';
-				$date = wfMsg( 'jqueryupload-uploadinfo', $img->user_text, $wgLang->date( $img->timestamp, true ) );
+				$date = wfMessage( 'jqueryupload-uploadinfo', $img->user_text, $wgLang->date( $img->timestamp, true ) );
 				$info = '<span class="file-info">' . $date . '</span><br />' . $info;
 			}
 		}
@@ -197,20 +197,20 @@ class jQueryUpload {
 					<!-- The fileinput-button span is used to style the file input field as button -->
 					<span class="btn btn-success fileinput-button">
 						<i class="icon-plus icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-add' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-add' ) . '</span>
 						<input type="file" name="files[]" multiple>
 					</span>
 					<button type="submit" class="btn btn-primary start">
 						<i class="icon-upload icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-start' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-start' ) . '</span>
 					</button>
 					<button type="reset" class="btn btn-warning cancel">
 						<i class="icon-ban-circle icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-cancel' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-cancel' ) . '</span>
 					</button>
 					<button type="button" class="btn btn-danger delete">
 						<i class="icon-trash icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-delsel' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-delsel' ) . '</span>
 					</button>
 					<input type="checkbox" class="toggle">
 				</div>
@@ -242,7 +242,7 @@ class jQueryUpload {
 				<td class="name">
 					<input type="hidden" name="upload_rename_from[]" value="{%=file.name%}" />
 					<input type="text" name="upload_rename_to[]" value="{%=uploadRenameBase(file.name)%}" />{%=uploadRenameExt(file.name)%}<br />
-					<input type="text" name="upload_desc[]" value="' . wfMsg( 'jqueryupload-enterdesc' ) . '" style="width:100%" />
+					<input type="text" name="upload_desc[]" value="' . wfMessage( 'jqueryupload-enterdesc' ) . '" style="width:100%" />
 				</td>
 				<td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
 				{% if (file.error) { %}
@@ -254,7 +254,7 @@ class jQueryUpload {
 					<td class="start">{% if (!o.options.autoUpload) { %}
 						<button class="btn btn-primary">
 							<i class="icon-upload icon-white"></i>
-							<span>' . wfMsg( 'jqueryupload-start' ) . '</span>
+							<span>' . wfMessage( 'jqueryupload-start' ) . '</span>
 						</button>
 					{% } %}</td>
 				{% } else { %}
@@ -263,7 +263,7 @@ class jQueryUpload {
 				<td class="cancel">{% if (!i) { %}
 					<button class="btn btn-warning">
 						<i class="icon-ban-circle icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-cancel' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-cancel' ) . '</span>
 					</button>
 				{% } %}</td>
 			</tr>
@@ -293,7 +293,7 @@ class jQueryUpload {
 				<td class="delete">
 					<button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
 						<i class="icon-trash icon-white"></i>
-						<span>' . wfMsg( 'jqueryupload-del' ) . '</span>
+						<span>' . wfMessage( 'jqueryupload-del' ) . '</span>
 					</button>
 					<input type="checkbox" name="delete" value="1">
 				</td>
