@@ -73,7 +73,7 @@ class MWUploadHandler extends UploadHandler {
 		if( empty( $name ) ) $name = $user->getName();
 		$d = $wgContLang->userDate( $data[1], $wgUser );
 		$t = $wgContLang->userTime( $data[1], $wgUser );
-		return wfMessage( 'jqueryupload-uploadinfo', $name, $d, $t );
+		return wfMessage( 'jqueryupload-uploadinfo', $name, $d, $t )->text();
 	}
 
 	/**
