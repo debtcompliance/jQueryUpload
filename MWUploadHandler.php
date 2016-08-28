@@ -100,12 +100,18 @@ class MWUploadHandler extends UploadHandler {
 		parent::delete();
 		$dir = $this->options['upload_dir'];
 
+		// Delete the meta file if it exists
+		if( $file_name = isset( $_REQUEST['file'] ) ? basename( stripslashes( $_REQUEST['file'] ) ) : null ) {
+			$meta = $dir . 'meta/' . $file_name;
+			if( is_file( $meta ) ) unlink( $meta );
+		}
+
 		// Check that the upload dir has no files in it
 		$empty = true;
 		foreach( glob( "$dir/*" ) as $item ) if( is_file( $item ) ) $empty = false;
 
 		// There are no uploaded files in this directory, nuke it
-		// - we need to use rm -rf because it still contains sub-dirs and meta data
+		// - we need to use rm -rf because it still contains sub-dirs
 		if( $empty ) exec( "rm -rf $dir" );
 	}
 
