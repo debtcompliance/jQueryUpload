@@ -1,7 +1,7 @@
 <?php
 /**
  * Main class for the jQueryUpload MediaWiki extension
- * 
+ *
  * The ajax handler, head items, form and templates are based on
  * the jQueryUpload demo by Sebastian Tschan (https://blueimp.net)
  *
@@ -279,10 +279,10 @@ class jQueryUpload {
 					<td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
 				{% } else { %}
 					<td class="preview">{% if (file.thumbnail_url) { %}
-						<a href="{%=file.url%}" title="{%=file.name%}" rel="gallery" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}"></a>
+						<a href="{%=file.url%}" title="{%=file.name%}" rel="gallery" target="_blank"><img src="{%=file.thumbnail_url%}"></a>
 					{% } %}</td>
 					<td class="name">
-						<a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnail_url&&\'gallery\'%}" download="{%=file.name%}">{%=file.name%}</a><br />
+						<a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnail_url&&\'gallery\'%}" target="_blank">{%=file.name%}</a><br />
 						<span class="file-info">{%=file.info%}</span><br />
 						<span class="file-desc">{%=file.desc%}</span>
 					</td>
