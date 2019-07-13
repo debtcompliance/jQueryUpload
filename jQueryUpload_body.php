@@ -37,7 +37,7 @@ class jQueryUpload {
 
 	// Using this hook for setup so that user and title are setup
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgOut, $wgTitle, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath, $wgAutoloadClasses;
+		global $wgOut, $wgTitle, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath;
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
