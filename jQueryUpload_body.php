@@ -40,7 +40,7 @@ class jQueryUpload {
 		global $wgOut, $wgTitle, $wgResourceModules, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath, $wgAutoloadClasses;
 
 		// Calculate the base path of the extension files accounting for symlinks
-		self::$path = $wgExtensionAssetsPath . str_replace( "$IP/extensions", '', dirname( $wgAutoloadClasses[__CLASS__] ) );
+		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
 
 		// If attachments allowed in this page, add the module into the page
 		if( is_object( $wgTitle ) ) $this->id = $wgTitle->getArticleID();
@@ -60,10 +60,9 @@ class jQueryUpload {
 			$wgHooks['BeforePageDisplay'][] = $this;
 		}
 
-		// Add the extensions own js
-		$wgResourceModules['ext.jqueryupload']['remoteExtPath'] = self::$path;
+		// Add the extensions own js and css
 		$wgOut->addModules( 'ext.jqueryupload' );
-		$wgOut->addStyle( self::$path . '/styles/jqueryupload.css' );
+		$wgOut->addModuleStyles( 'ext.jqueryupload' );
 	}
 
 	/**

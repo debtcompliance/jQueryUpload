@@ -1,6 +1,6 @@
 {
 	"name": "jQueryUpload",
-	"version": "1.4.6, 2019-07-03",
+	"version": "1.4.7, 2019-07-13",
 	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]", "[http://blueimp.net Sebastian Tschan]"],
 	"url": "http://www.organicdesign.co.nz/jQueryUpload",
 	"descriptionmsg": "jqueryupload-desc",
@@ -31,6 +31,7 @@
 	},
 	"ResourceModules": {
 		"ext.jqueryupload": {
+			"styles": ["styles/jqueryupload.css"],
 			"scripts": [
 				"blueimp/JavaScript-Templates/tmpl.min.js",
 				"blueimp/JavaScript-Load-Image/load-image.min.js",
@@ -48,9 +49,8 @@
 			"dependencies": ["mediawiki.util", "jquery.ui.dialog", "jquery.ui.widget"]
 		}
 	},
-	"@": "Paths calculated at runtime",
 	"ResourceFileModulePaths": {
 		"localBasePath": "",
-		"remoteExtPath": ""
+		"remoteExtPath": "jQueryUpload"
 	}
 }
