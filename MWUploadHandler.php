@@ -124,10 +124,15 @@ class MWUploadHandler extends UploadHandler {
 			$file_path = $this->options['upload_dir'] . $file->name;
 			if( is_file( $file_path ) ) {
 				global $wgUser;
-				$desc = jQueryUpload::$desc[$file->name];
-				$meta = $this->options['upload_dir'] . 'meta/' . $file->name;
-				$data = array( $wgUser->getID(), time(), $desc == wfMessage( 'jqueryupload-enterdesc' ) ? '' : $desc );
-				file_put_contents( $meta, serialize( $data ) );
+				if( Hooks::run( 'jQueryUploadCheckFile', [$file_path] ) ) {
+					$desc = jQueryUpload::$desc[$file->name];
+					$meta = $this->options['upload_dir'] . 'meta/' . $file->name;
+					$data = array( $wgUser->getID(), time(), $desc == wfMessage( 'jqueryupload-enterdesc' ) ? '' : $desc );
+					file_put_contents( $meta, serialize( $data ) );
+				} else {
+					unlink($file_path);
+					$file->error = wfMessage( 'jqueryupload-virus' )->text();
+				}
 			}
 		}
 		return $file;
