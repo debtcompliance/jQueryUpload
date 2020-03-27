@@ -12,6 +12,5 @@
 	"jqueryupload-delsel": "Apagar arquivo(s)",
 	"jqueryupload-del": "Apagar",
 	"jqueryupload-start": "Iniciar upload",
-	"jqueryupload-cancel": "Cancelar",
-	"jqueryupload-virus": "Um vírus foi detectado no arquivo"
+	"jqueryupload-cancel": "Cancelar"
 }
