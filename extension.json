@@ -46,7 +46,7 @@
 				"upload/js/cors/jquery.xdr-transport.js",
 				"modules/jqueryupload.js"
 			],
-			"dependencies": ["mediawiki.util", "jquery.ui.dialog", "jquery.ui.widget"]
+			"dependencies": ["mediawiki.util", "jquery.ui"]
 		}
 	},
 	"ResourceFileModulePaths": {
