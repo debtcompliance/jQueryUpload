@@ -1,14 +1,14 @@
 <?php
 /**
-* Aliases for special pages
-*
-* @file
-* @ingroup Extensions
-*/
+ * Aliases for special pages
+ *
+ * @file
+ * @ingroup Extensions
+ */
 
-$specialPageAliases = array();
+$specialPageAliases = [];
 
 /** English (English) */
-$specialPageAliases['en'] = array(
-	'jQueryUpload' => array( 'jQueryUpload' ),
-);
+$specialPageAliases['en'] = [
+	'jQueryUpload' => [ 'jQueryUpload' ],
+];

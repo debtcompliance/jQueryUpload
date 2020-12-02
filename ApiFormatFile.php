@@ -45,7 +45,7 @@ class ApiFormatFile extends ApiFormatBase {
 		if ( $this->isDisabled() ) {
 			return;
 		}
-		if( $this->file ) {
+		if ( $this->file ) {
 			ob_clean();
 			readfile( $this->file );
 		} else {
@@ -53,9 +53,9 @@ class ApiFormatFile extends ApiFormatBase {
 		}
 	}
 
-
 	public function execute() {
 		$data = $this->getResult()->getResultData();
+		wfDebugLog( 'jQueryUpload', 'data is ' . var_export( $data, true ) );
 		if ( isset( $data['error'] ) ) {
 			$this->errorFallback->execute();
 			return;

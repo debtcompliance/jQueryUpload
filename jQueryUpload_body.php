@@ -11,16 +11,14 @@
  */
 class jQueryUpload {
 
-	public static $instance = null;
-	public static $desc = array();
-	public static $action = null;
+	public $id = 0;
 	public static $path;
-
-	var $id = 0;
+	public static $desc = [];
+	public static $instance = null;
+	public static $action = null;
 
 	public static function onRegistration() {
-		global $wgExtensionFunctions, $wgAPIModules, $wgJQUaction;
-
+		global $wgAPIModules, $wgJQUaction;
 
 		// Register our API Ajax handler
 		$wgAPIModules['jqu'] = 'ApijQueryUpload';
@@ -32,30 +30,44 @@ class jQueryUpload {
 		self::$action = $wgJQUaction;
 
 		// Do the rest of the setup after user and title are ready
-		Hooks::register( 'UserGetRights', self::$instance );
+		$hookContainer = MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
+		$hookContainer->register( 'UserGetRights', self::$instance );
 	}
 
-	// Using this hook for setup so that user and title are setup
+	/**
+	 *	Using this hook for setup so that user and title are setup
+	 */
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgOut, $wgTitle, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath;
+		global $wgOut, $wgTitle, $wgHooks, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath;
+
+		$hookContainer = MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
 
 		// If attachments allowed in this page, add the module into the page
-		if( is_object( $wgTitle ) ) $this->id = $wgTitle->getArticleID();
+		if ( is_object( $wgTitle ) ) {
+			$this->id = $wgTitle->getArticleID();
+		}
 
 		// Set up the #file parser-function
-		$wgParser->setFunctionHook( $wgJQUploadFileMagic, array( $this, 'expandFile' ), SFH_NO_HASH );
+		$parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
+		$parser->setFunctionHook( $wgJQUploadFileMagic, [ $this, 'expandFile' ], SFH_NO_HASH );
 
 		// Allow overriding of the file ID
-		Hooks::run( 'jQueryUploadSetId', array( $wgTitle, &$this->id ) );
+		$hookContainer->run( 'jQueryUploadSetId', [ $wgTitle, &$this->id ] );
 
 		// If attachments allowed in this page, add the module into the page
-		$attach = is_object( $wgTitle ) && $this->id && !$wgTitle->isRedirect()
-			&& !array_key_exists( 'action', $_REQUEST ) && $wgTitle->getNamespace() != 6;
-		if( $attach ) Hooks::run( 'jQueryUploadAddAttachLink', array( $wgTitle, &$attach ) );
-		if( $attach ) {
+		$attach = is_object( $wgTitle )
+			&& $this->id
+			&& !$wgTitle->isRedirect()
+			&& !array_key_exists( 'action', $_REQUEST )
+			&& $wgTitle->getNamespace() != 6;
+
+		if ( $attach ) {
+			$hookContainer->run( 'jQueryUploadAddAttachLink', [ $wgTitle, &$attach ] );
+		}
+		if ( $attach ) {
 			$this->head();
 			$wgHooks['BeforePageDisplay'][] = $this;
 		}
@@ -68,7 +80,7 @@ class jQueryUpload {
 	/**
 	 * Render scripts and form into an article
 	 */
-	function onBeforePageDisplay( $out, $skin ) {
+	public function onBeforePageDisplay( $out, $skin ) {
 		$out->addHtml( '<h2 class="jqueryupload">' . wfMessage( 'jqueryupload-attachments' )->text() . '</h2>' );
 		$out->addHtml( $this->form() );
 		$out->addHtml( $this->templates() );
@@ -80,12 +92,17 @@ class jQueryUpload {
 	 */
 	public static function icon( $file ) {
 		global $IP, $wgJQUploadIconPrefix;
-		if( $ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) ) ) {
+		$ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+		if ( $ext ) {
 			$prefix = $wgJQUploadIconPrefix ? $wgJQUploadIconPrefix : "$IP/skins/common/images/icons/fileicon-";
 			$icon = __DIR__ . "$prefix$ext.png";
 			wfDebug( "Icon for \"$file\": $icon" );
-			if( !file_exists( $icon ) ) $icon = preg_replace( '|[-_]$|', '', $prefix ) . '.png';
-		} else $icon = '';
+			if ( !file_exists( $icon ) ) {
+				$icon = preg_replace( '|[-_]$|', '', $prefix ) . '.png';
+			}
+		} else {
+			$icon = '';
+		}
 		return $icon;
 	}
 
@@ -94,59 +111,70 @@ class jQueryUpload {
 	 * (so that thumbnails always have an image extension)
 	 */
 	public static function thumbFilename( $file ) {
-		return $file;
+		/* return $file; */
 		return preg_match( "/^.+\.(jpe?g$|png|gif)$/", $file ) ? $file : "$file.png";
 	}
 
 	/**
 	 * Expand the #file parser-function
 	 */
-	function expandFile( $parser, $filename, $anchor = false ) {
+	public function expandFile( $parser, $filename, $anchor = false ) {
 		global $wgJQUploadFileLinkPopup;
 		$class = '';
 		$href = false;
 		$info = '';
-		if( $anchor === false ) $anchor = $filename;
+		if ( $anchor === false ) {
+			$anchor = $filename;
+		}
 
 		// Check if the file is a locally uploaded one
 		$img = wfLocalFile( $filename );
-		if( $img->exists() ) {
+		if ( $img->exists() ) {
 			global $wgLang;
 			$href = $img->getUrl();
 			$class = ' local-file';
-			if( $wgJQUploadFileLinkPopup ) {
+			if ( $wgJQUploadFileLinkPopup ) {
 				$title = $img->getTitle();
 				$article = new Article( $title );
 				$wikitext = $article->getPage()->getContent()->getNativeData();
 				$info = $parser->parse( $wikitext, $parser->getTitle(), new ParserOptions(), false, false )->getText();
-				if( !empty( $info ) ) $info = '<span class="file-desc">' . $info . '</span>';
+				if ( !empty( $info ) ) {
+					$info = '<span class="file-desc">' . $info . '</span>';
+				}
 				$date = wfMessage( 'jqueryupload-uploadinfo', $img->user_text, $wgLang->date( $img->timestamp, true ) );
 				$info = '<span class="file-info">' . $date . '</span><br />' . $info;
 			}
 		}
 
 		// Not local, check if it's a jQuery one
-		if( $href === false ) {
-			global $wgUploadDirectory, $wgScriptPath;
-			if( $glob = glob( "$wgUploadDirectory/jquery_upload_files/*/$filename" ) ) {
-				if( preg_match( "|jquery_upload_files/(\d+)/|", $glob[0], $m ) ) {
+		if ( $href === false ) {
+			global $wgUploadDirectory;
+			$glob = glob( "$wgUploadDirectory/jquery_upload_files/*/$filename" );
+			if ( $glob ) {
+				if ( preg_match( "|jquery_upload_files/(\d+)/|", $glob[0], $m ) ) {
 					$path = $m[1];
 					$class = ' jquery-file';
 					$href = self::fileUrl( $path, $filename );
-					if( $wgJQUploadFileLinkPopup ) {
+					if ( $wgJQUploadFileLinkPopup ) {
 						$meta = "$wgUploadDirectory/jquery_upload_files/$path/meta/$filename";
-						if( file_exists( $meta ) ) {
+						if ( file_exists( $meta ) ) {
 							$data = unserialize( file_get_contents( $meta ) );
 							$info = '<span class="file-info">' . MWUploadHandler::renderData( $data ) . '</span>';
-							if( $data[2] ) $info .= '<br /><span class="file-desc">' . $data[2] . '</span>';
+							if ( $data[2] ) {
+								$info .= '<br /><span class="file-desc">' . $data[2] . '</span>';
+							}
 						}
 					}
 				}
 			}
 		}
 
-		if( $href === false ) $class = ' redlink';
-		if( !empty( $info ) ) $info = "<span style=\"display:none\">$info</span>";
+		if ( $href === false ) {
+			$class = ' redlink';
+		}
+		if ( !empty( $info ) ) {
+			$info = "<span style=\"display:none\">$info</span>";
+		}
 		return "<span class=\"jqu-span\"><span class=\"plainlinks$class\" title=\"$href\">$anchor$info</span></span>";
 	}
 
@@ -155,7 +183,7 @@ class jQueryUpload {
 	 */
 	public static function onLanguageGetMagic( &$magicWords, $langCode = 0 ) {
 		global $wgJQUploadFileMagic;
-		$magicWords[$wgJQUploadFileMagic] = array( 0, $wgJQUploadFileMagic );
+		$magicWords[$wgJQUploadFileMagic] = [ 0, $wgJQUploadFileMagic ];
 		return true;
 	}
 
@@ -186,7 +214,9 @@ class jQueryUpload {
 
 	private function form() {
 		global $wgScriptPath, $wgTitle;
-		if( $this->id === false ) $this->id = $wgTitle->getArticleID();
+		if ( $this->id === false ) {
+			$this->id = $wgTitle->getArticleID();
+		}
 		$path = ( is_object( $wgTitle ) && $this->id ) ? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />" : '';
 		return '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">
 			<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->

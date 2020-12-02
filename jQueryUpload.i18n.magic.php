@@ -3,8 +3,8 @@
  * Internationalization file for magic words.
  */
 
-$magicWords = array();
+$magicWords = [];
 
-$magicWords['en'] = array(
-	'file' => array( 0, 'file' )
-);
+$magicWords['en'] = [
+	'file' => [ 0, 'file' ]
+];

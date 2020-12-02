@@ -15,7 +15,7 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
-			
+
 $(function() {
 	'use strict';
 

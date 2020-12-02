@@ -1,7 +1,11 @@
 {
 	"name": "jQueryUpload",
-	"version": "1.4.7, 2019-07-13",
-	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]", "[http://blueimp.net Sebastian Tschan]"],
+	"version": "1.4.8, 2020-12-02",
+	"author": [
+		"[http://www.organicdesign.co.nz/aran Aran Dunkley]",
+		"[http://blueimp.net Sebastian Tschan]",
+		"[http://absorto.dev Igor Absorto]"
+	],
 	"url": "http://www.organicdesign.co.nz/jQueryUpload",
 	"descriptionmsg": "jqueryupload-desc",
 	"license-name": "[https://www.gnu.org/licenses/gpl-2.0.html GNU General Public Licence 2.0] or later",
@@ -52,5 +56,6 @@
 	"ResourceFileModulePaths": {
 		"localBasePath": "",
 		"remoteExtPath": "jQueryUpload"
-	}
+	},
+	"manifest_version": 1
 }
