@@ -16,6 +16,8 @@ class jQueryUpload {
 	public static $desc = [];
 	public static $instance = null;
 	public static $action = null;
+	public static $canUpload = false;
+	public static $canDelete = false;
 
 	public static function onRegistration() {
 		global $wgAPIModules, $wgJQUaction;
@@ -38,12 +40,17 @@ class jQueryUpload {
 	 *	Using this hook for setup so that user and title are setup
 	 */
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgOut, $wgTitle, $wgHooks, $wgJQUploadFileMagic, $IP, $wgExtensionAssetsPath;
+		global $wgOut, $wgTitle, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP,
+			$wgExtensionAssetsPath, $wgAvailableRights, $wgGroupPermissions, $wgGrantPermissions;
 
 		$hookContainer = MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
+
+		// Introduce new rights for uploading and deleting upload
+		$wgAvailableRights[] = 'jquupload';
+		$wgAvailableRights[] = 'jqudelete';
 
 		// If attachments allowed in this page, add the module into the page
 		if ( is_object( $wgTitle ) ) {
@@ -75,6 +82,15 @@ class jQueryUpload {
 		// Add the extensions own js and css
 		$wgOut->addModules( 'ext.jqueryupload' );
 		$wgOut->addModuleStyles( 'ext.jqueryupload' );
+
+		// Initialize actions permissions
+		if ( $user->isAllowed( 'jquupload' ) ) {
+			self::$canUpload = true;
+		}
+
+		if ( $user->isAllowed( 'jqudelete' ) ) {
+			self::$canDelete = true;
+		}
 	}
 
 	/**
@@ -217,32 +233,43 @@ class jQueryUpload {
 		if ( $this->id === false ) {
 			$this->id = $wgTitle->getArticleID();
 		}
-		$path = ( is_object( $wgTitle ) && $this->id ) ? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />" : '';
-		return '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">
-			<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+		$path = ( is_object( $wgTitle ) && $this->id )
+			? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />"
+			: '';
+		$html = '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">';
+		if ( self::$canUpload ) {
+			$html .= '<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
 			<div class="row fileupload-buttonbar">
 				<div class="span7">
 					<!-- The fileinput-button span is used to style the file input field as button -->
+
 					<span class="btn btn-success fileinput-button">
 						<i class="icon-plus icon-white"></i>
 						<span>' . wfMessage( 'jqueryupload-add' ) . '</span>
 						<input type="file" name="files[]" multiple>
 					</span>
+
 					<button type="submit" class="btn btn-primary start">
 						<i class="icon-upload icon-white"></i>
 						<span>' . wfMessage( 'jqueryupload-start' ) . '</span>
 					</button>
+
 					<button type="reset" class="btn btn-warning cancel">
 						<i class="icon-ban-circle icon-white"></i>
 						<span>' . wfMessage( 'jqueryupload-cancel' ) . '</span>
-					</button>
+					</button>';
+
+		if ( self::$canDelete ) {
+			$html .= '
 					<button type="button" class="btn btn-danger delete">
 						<i class="icon-trash icon-white"></i>
 						<span>' . wfMessage( 'jqueryupload-delsel' ) . '</span>
 					</button>
 					<input type="checkbox" class="toggle">
-				</div>
-				<!-- The global progress information -->
+				</div>';
+		}
+
+		$html .= '<!-- The global progress information -->
 				<div class="span5 fileupload-progress fade">
 					<!-- The global progress bar -->
 					<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
@@ -254,15 +281,18 @@ class jQueryUpload {
 			</div>
 			<!-- The loading indicator is shown during file processing -->
 			<div class="fileupload-loading"></div>
-			<br>
-			<!-- The table listing the files available for upload/download -->
+			<br>';
+		}
+
+		$html .=	'<!-- The table listing the files available for upload/download -->
 			<table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
 			<input type="hidden" name="mwaction" value="jqu" />' . $path . '
 		</form>';
+		return $html;
 	}
 
 	private function templates() {
-		return '<!-- The template to display files available for upload -->
+		$html = '<!-- The template to display files available for upload -->
 		<script id="template-upload" type="text/x-tmpl">
 		{% for (var i=0, file; file=o.files[i]; i++) { %}
 			<tr class="template-upload fade">
@@ -296,8 +326,9 @@ class jQueryUpload {
 				{% } %}</td>
 			</tr>
 		{% } %}
-		</script>
-		<!-- The template to display files available for download -->
+		</script>';
+
+		$html .= '<!-- The template to display files available for download -->
 		<script id="template-download" type="text/x-tmpl">
 		{% for (var i=0, file; file=o.files[i]; i++) { %}
 			<tr class="template-download fade">
@@ -317,16 +348,19 @@ class jQueryUpload {
 					</td>
 					<td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
 					<td colspan="2"></td>
-				{% } %}
-				<td class="delete">
-					<button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
-						<i class="icon-trash icon-white"></i>
-						<span>' . wfMessage( 'jqueryupload-del' ) . '</span>
-					</button>
-					<input type="checkbox" name="delete" value="1">
-				</td>
-			</tr>
-		{% } %}
+				{% } %}';
+		if ( self::$canDelete ) {
+			$html .= '<td class="delete">
+						<button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+							<i class="icon-trash icon-white"></i>
+							<span>' . wfMessage( 'jqueryupload-del' ) . '</span>
+						</button>
+						<input type="checkbox" name="delete" value="1">
+					</td>';
+		}
+		$html .= '</tr>
+			{% } %}
 		</script>';
+		return $html;
 	}
 }

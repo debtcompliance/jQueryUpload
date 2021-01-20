@@ -55,7 +55,6 @@ class ApiFormatFile extends ApiFormatBase {
 
 	public function execute() {
 		$data = $this->getResult()->getResultData();
-		wfDebugLog( 'jQueryUpload', 'data is ' . var_export( $data, true ) );
 		if ( isset( $data['error'] ) ) {
 			$this->errorFallback->execute();
 			return;

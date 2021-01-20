@@ -8,14 +8,19 @@ use MediaWiki\MediaWikiServices;
 class MWUploadHandler extends UploadHandler {
 
 	/**
-	 * The delete URL needs to be adjusted because it doesn't check if the script URL already has a query-string and to add path info
+	 * The delete URL needs to be adjusted because it doesn't check
+	 * if the script URL already has a query-string and to add path info
 	 */
 	protected function set_file_delete_url( $file ) {
-		$path = preg_match( '|jquery_upload_files/(.+)/|', $this->options['upload_dir'], $m ) ? "&path=$m[1]" : '';
-		$file->delete_url = $this->options['script_url'] . "$path&file=" . rawurlencode( $file->name );
-		$file->delete_type = $this->options['delete_type'];
-		if ( $file->delete_type !== 'DELETE' ) {
-			$file->delete_url .= '&_method=DELETE';
+		if ( jQueryUpload::$canDelete ) {
+			$path = preg_match( '|jquery_upload_files/(.+)/|', $this->options['upload_dir'], $m )
+				? "&path=$m[1]"
+				: '';
+			$file->delete_url = $this->options['script_url'] . "$path&file=" . rawurlencode( $file->name );
+			$file->delete_type = $this->options['delete_type'];
+			if ( $file->delete_type !== 'DELETE' ) {
+				$file->delete_url .= '&_method=DELETE';
+			}
 		}
 	}
 
@@ -110,29 +115,31 @@ class MWUploadHandler extends UploadHandler {
 	 * We should remove the unused directory after deleting a file
 	 */
 	public function delete() {
-		parent::delete();
-		$dir = $this->options['upload_dir'];
+		if ( jQueryUpload::$canDelete ) {
+			parent::delete();
+			$dir = $this->options['upload_dir'];
 
-		// Delete the meta file if it exists
-		if ( $file_name = isset( $_REQUEST['file'] ) ? basename( stripslashes( $_REQUEST['file'] ) ) : null ) {
-			$meta = $dir . 'meta/' . $file_name;
-			if ( is_file( $meta ) ) {
-				unlink( $meta );
+			// Delete the meta file if it exists
+			if ( $file_name = isset( $_REQUEST['file'] ) ? basename( stripslashes( $_REQUEST['file'] ) ) : null ) {
+				$meta = $dir . 'meta/' . $file_name;
+				if ( is_file( $meta ) ) {
+					unlink( $meta );
+				}
 			}
-		}
 
-		// Check that the upload dir has no files in it
-		$empty = true;
-		foreach ( glob( "$dir/*" ) as $item ) {
-			if ( is_file( $item ) ) {
-				$empty = false;
+			// Check that the upload dir has no files in it
+			$empty = true;
+			foreach ( glob( "$dir/*" ) as $item ) {
+				if ( is_file( $item ) ) {
+					$empty = false;
+				}
 			}
-		}
 
-		// There are no uploaded files in this directory, nuke it
-		// - we need to use rm -rf because it still contains sub-dirs
-		if ( $empty ) {
-			exec( "rm -rf $dir" );
+			// There are no uploaded files in this directory, nuke it
+			// - we need to use rm -rf because it still contains sub-dirs
+			if ( $empty ) {
+				exec( "rm -rf $dir" );
+			}
 		}
 	}
 
