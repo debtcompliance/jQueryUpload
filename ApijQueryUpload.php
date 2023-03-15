@@ -26,7 +26,7 @@ class ApijQueryUpload extends ApiBase {
 			global $wgUser;
 
 			// Only return the file if the user is logged in
-			if ( !$wgUser->isLoggedIn() ) {
+			if ( !$wgUser->isRegistered() ) {
 				ApiBase::dieDebug( __METHOD__, 'Not logged in' );
 			}
 
