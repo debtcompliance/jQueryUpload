@@ -146,7 +146,6 @@ class jQueryUpload {
 		// Check if the file is a locally uploaded one
 		$img = wfLocalFile( $filename );
 		if ( $img->exists() ) {
-			global $wgLang;
 			$href = $img->getUrl();
 			$class = ' local-file';
 			if ( $wgJQUploadFileLinkPopup ) {
@@ -157,7 +156,10 @@ class jQueryUpload {
 				if ( !empty( $info ) ) {
 					$info = '<span class="file-desc">' . $info . '</span>';
 				}
-				$date = wfMessage( 'jqueryupload-uploadinfo', $img->user_text, $wgLang->date( $img->timestamp, true ) );
+
+				$lang = RequestContext::getMain()->getLanguage();
+
+				$date = wfMessage( 'jqueryupload-uploadinfo', $img->user_text, $lang->date( $img->timestamp, true ) );
 				$info = '<span class="file-info">' . $date . '</span><br />' . $info;
 			}
 		}
