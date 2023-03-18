@@ -82,15 +82,14 @@ class MWUploadHandler extends UploadHandler {
 	 * Render file data
 	 */
 	public static function renderData( $data ) {
-		global $wgUser;
 		$user = User::newFromID( $data[0] );
 		$name = $user->getRealName();
 		if ( empty( $name ) ) {
 			$name = $user->getName();
 		}
 		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
-		$d = $contLang->userDate( $data[1], $wgUser );
-		$t = $contLang->userTime( $data[1], $wgUser );
+		$d = $contLang->userDate( $data[1], RequestContext::getMain()->getUser() );
+		$t = $contLang->userTime( $data[1], RequestContext::getMain()->getUser() );
 		return wfMessage( 'jqueryupload-uploadinfo', $name, $d, $t )->text();
 	}
 
@@ -151,12 +150,12 @@ class MWUploadHandler extends UploadHandler {
 		if ( is_object( $file ) ) {
 			$file_path = $this->options['upload_dir'] . $file->name;
 			if ( is_file( $file_path ) ) {
-				global $wgUser;
+				$user = RequestContext::getMain()->getUser();
 				$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 				if ( $hookContainer->run( 'jQueryUploadCheckFile', [ &$file, $file_path ] ) ) {
 					$desc = jQueryUpload::$desc[$file->name];
 					$meta = $this->options['upload_dir'] . 'meta/' . $file->name;
-					$data = [ $wgUser->getID(), time(), $desc == wfMessage( 'jqueryupload-enterdesc' ) ? '' : $desc ];
+					$data = [ $user->getID(), time(), $desc == wfMessage( 'jqueryupload-enterdesc' ) ? '' : $desc ];
 					file_put_contents( $meta, serialize( $data ) );
 				} else {
 					unlink( $file_path );

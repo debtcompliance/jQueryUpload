@@ -23,10 +23,8 @@ class ApijQueryUpload extends ApiBase {
 
 		// If a file name is supplied, then this is a file or thumbnail request
 		if ( $name ) {
-			global $wgUser;
-
 			// Only return the file if the user is logged in
-			if ( !$wgUser->isRegistered() ) {
+			if ( !RequestContext::getMain()->getUser()->isRegistered() ) {
 				ApiBase::dieDebug( __METHOD__, 'Not logged in' );
 			}
 
