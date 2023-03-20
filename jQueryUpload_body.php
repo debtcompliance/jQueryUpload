@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 /**
  * Main class for the jQueryUpload MediaWiki extension
  *
@@ -32,7 +35,7 @@ class jQueryUpload {
 		self::$action = $wgJQUaction;
 
 		// Do the rest of the setup after user and title are ready
-		$hookContainer = MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 		$hookContainer->register( 'UserGetRights', self::$instance );
 	}
 
@@ -40,10 +43,13 @@ class jQueryUpload {
 	 *	Using this hook for setup so that user and title are setup
 	 */
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgOut, $wgTitle, $wgHooks, $wgParser, $wgJQUploadFileMagic, $IP,
-			$wgExtensionAssetsPath, $wgAvailableRights, $wgGroupPermissions, $wgGrantPermissions;
+		global $wgHooks, $wgJQUploadFileMagic, $wgExtensionAssetsPath,
+			$wgAvailableRights, $wgGroupPermissions, $wgGrantPermissions;
 
-		$hookContainer = MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+
+		$out = RequestContext::getMain()->getOutput();
+		$title = RequestContext::getMain()->getTitle();
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
@@ -53,26 +59,26 @@ class jQueryUpload {
 		$wgAvailableRights[] = 'jqudelete';
 
 		// If attachments allowed in this page, add the module into the page
-		if ( is_object( $wgTitle ) ) {
-			$this->id = $wgTitle->getArticleID();
+		if ( is_object( $title ) ) {
+			$this->id = $title->getArticleID();
 		}
 
 		// Set up the #file parser-function
-		$parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
+		$parser = MediaWikiServices::getInstance()->getParser();
 		$parser->setFunctionHook( $wgJQUploadFileMagic, [ $this, 'expandFile' ], SFH_NO_HASH );
 
 		// Allow overriding of the file ID
-		$hookContainer->run( 'jQueryUploadSetId', [ $wgTitle, &$this->id ] );
+		$hookContainer->run( 'jQueryUploadSetId', [ $title, &$this->id ] );
 
 		// If attachments allowed in this page, add the module into the page
-		$attach = is_object( $wgTitle )
+		$attach = is_object( $title )
 			&& $this->id
-			&& !$wgTitle->isRedirect()
+			&& !$title->isRedirect()
 			&& !array_key_exists( 'action', $_REQUEST )
-			&& $wgTitle->getNamespace() != 6;
+			&& $title->getNamespace() != 6;
 
 		if ( $attach ) {
-			$hookContainer->run( 'jQueryUploadAddAttachLink', [ $wgTitle, &$attach ] );
+			$hookContainer->run( 'jQueryUploadAddAttachLink', [ $title, &$attach ] );
 		}
 		if ( $attach ) {
 			$this->head();
@@ -80,8 +86,8 @@ class jQueryUpload {
 		}
 
 		// Add the extensions own js and css
-		$wgOut->addModules( 'ext.jqueryupload' );
-		$wgOut->addModuleStyles( 'ext.jqueryupload' );
+		$out->addModules( [ 'ext.jqueryupload' ] );
+		$out->addModuleStyles( [ 'ext.jqueryupload' ] );
 
 		// Initialize actions permissions
 		if ( $user->isAllowed( 'jquupload' ) ) {
@@ -107,10 +113,10 @@ class jQueryUpload {
 	 * Return a file icon for the passed filename
 	 */
 	public static function icon( $file ) {
-		global $IP, $wgJQUploadIconPrefix;
+		global $wgJQUploadIconPrefix;
 		$ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
 		if ( $ext ) {
-			$prefix = $wgJQUploadIconPrefix ? $wgJQUploadIconPrefix : "$IP/skins/common/images/icons/fileicon-";
+			$prefix = $wgJQUploadIconPrefix ?: MW_INSTALL_PATH . '/skins/common/images/icons/fileicon-';
 			$icon = __DIR__ . "$prefix$ext.png";
 			wfDebug( "Icon for \"$file\": $icon" );
 			if ( !file_exists( $icon ) ) {
@@ -214,28 +220,33 @@ class jQueryUpload {
 	}
 
 	private function head() {
-		global $wgOut;
 		$css = self::$path . '/upload/css';
 
+		$out = RequestContext::getMain()->getOutput();
+
 		// CSS to style the file input field as button and adjust the Bootstrap progress bars
-		$wgOut->addStyle( "$css/jquery.fileupload-ui.css", 'screen' );
+		$out->addStyle( "$css/jquery.fileupload-ui.css", 'screen' );
 
 		// Bootstrap CSS fixes for IE6
-		$wgOut->addHeadItem( 'IE6', "<!--[if lt IE 7]><link rel=\"stylesheet\" href=\"http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css\"><![endif]-->\n" );
+		$out->addHeadItem( 'IE6', "<!--[if lt IE 7]><link rel=\"stylesheet\" href=\"http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css\"><![endif]-->\n" );
 
 		// Shim to make HTML5 elements usable in older Internet Explorer versions
-		$wgOut->addHeadItem( 'HTML5', "<!--[if lt IE 9]><script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script><![endif]-->\n" );
+		$out->addHeadItem( 'HTML5', "<!--[if lt IE 9]><script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script><![endif]-->\n" );
 
 		// Set the ID to use for images on this page (defaults to article ID)
-		$wgOut->addJsConfigVars( 'jQueryUploadID', $this->id );
+		$out->addJsConfigVars( 'jQueryUploadID', $this->id );
 	}
 
 	private function form() {
-		global $wgScriptPath, $wgTitle;
+		global $wgScriptPath;
+
+		$title = RequestContext::getMain()->getTitle();
+
 		if ( $this->id === false ) {
-			$this->id = $wgTitle->getArticleID();
+			$this->id = $title->getArticleID();
 		}
-		$path = ( is_object( $wgTitle ) && $this->id )
+
+		$path = ( is_object( $title ) && $this->id )
 			? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />"
 			: '';
 		$html = '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">';
