@@ -102,12 +102,15 @@ class MWUploadHandler extends UploadHandler {
 		$dbr = wfGetDB( DB_REPLICA );
 		$row = $dbr->selectRow(
 			'revision',
-			[ 'rev_user', 'rev_timestamp' ],
+			[ 'rev_actor', 'rev_timestamp' ],
 			[ 'rev_page' => $title->getArticleID() ],
 			__METHOD__,
 			[ 'ORDER BY' => 'rev_timestamp','LIMIT' => 1 ]
 		);
-		return [ $row->rev_user, $row->rev_timestamp, $desc ];
+
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $row->rev_actor );
+
+		return [ $user->getId(), $row->rev_timestamp, $desc ];
 	}
 
 	/**
