@@ -158,7 +158,7 @@ class jQueryUpload {
 				$title = $img->getTitle();
 				$article = new Article( $title );
 				$wikitext = $article->getPage()->getContent()->getNativeData();
-				$info = $parser->parse( $wikitext, $parser->getTitle(), new ParserOptions(), false, false )->getText();
+				$info = $parser->parse( $wikitext, $parser->getTitle(), $parser->getOptions(), false, false )->getText();
 				if ( !empty( $info ) ) {
 					$info = '<span class="file-desc">' . $info . '</span>';
 				}
