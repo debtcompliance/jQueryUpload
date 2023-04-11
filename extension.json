@@ -8,7 +8,7 @@
 		"[https://absorto.dev Igor Absorto]",
 		"[https://professional.wiki/en/mediawiki-development Professional Wiki]"
 	],
-	"url": "https://www.mediawiki.org/wiki/Extension:JQueryUpload",
+	"url": "https://organicdesign.nz/Extension:JQueryUpload",
 	"descriptionmsg": "jqueryupload-desc",
 	"type": "specialpage",
 	"requires": {
