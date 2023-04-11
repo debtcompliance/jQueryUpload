@@ -1,15 +1,22 @@
 {
 	"name": "jQueryUpload",
-	"version": "1.5.0, 2021-01-20",
+	"version": "2.0.0-beta",
+	"license-name": "GPL-2.0-or-later",
 	"author": [
-		"[http://www.organicdesign.co.nz/aran Aran Dunkley]",
-		"[http://blueimp.net Sebastian Tschan]",
-		"[http://absorto.dev Igor Absorto]"
+		"[https://organicdesign.nz/User:Nad Aran Dunkley]",
+		"[https://blueimp.net Sebastian Tschan]",
+		"[https://absorto.dev Igor Absorto]",
+		"[https://professional.wiki/en/mediawiki-development Professional Wiki]"
 	],
-	"url": "http://www.organicdesign.co.nz/jQueryUpload",
+	"url": "https://organicdesign.nz/Extension:JQueryUpload",
 	"descriptionmsg": "jqueryupload-desc",
-	"license-name": "[https://www.gnu.org/licenses/gpl-2.0.html GNU General Public Licence 2.0] or later",
 	"type": "specialpage",
+	"requires": {
+		"MediaWiki": ">= 1.39.0",
+		"platform": {
+			"php": ">= 8.0"
+		}
+	},
 	"callback": "jQueryUpload::onRegistration",
 	"AutoloadClasses": {
 		"jQueryUpload": "jQueryUpload_body.php",
@@ -19,23 +26,36 @@
 		"MWUploadHandler": "MWUploadHandler.php"
 	},
 	"Hooks": {
-		"LanguageGetMagic": ["jQueryUpload::onLanguageGetMagic"]
+		"LanguageGetMagic": "jQueryUpload::onLanguageGetMagic"
 	},
 	"config": {
-		"JQUploadIconPrefix": "/icons/Farm-Fresh_file_extension_",
-		"JQUploadFileMagic": "file",
-		"JQUploadFileLinkPopup": true
+		"JQUploadIconPrefix": {
+			"description": "Defines the relative path to the icons",
+			"value": "/icons/Farm-Fresh_file_extension_"
+		},
+		"JQUploadFileMagic": {
+			"description": "Defines the upload file magic mode",
+			"value": "file"
+		},
+		"JQUploadFileLinkPopup": {
+			"description": "Whether or not the upload file link should be a popup",
+			"value": true
+		}
 	},
 	"ExtensionMessagesFiles": {
 		"jQueryUploadAlias": "jQueryUpload.alias.php",
 		"jQueryUploadMagic": "jQueryUpload.i18n.magic.php"
 	},
 	"MessagesDirs": {
-		"jQueryUpload": ["i18n"]
+		"jQueryUpload": [
+			"i18n"
+		]
 	},
 	"ResourceModules": {
 		"ext.jqueryupload": {
-			"styles": ["styles/jqueryupload.css"],
+			"styles": [
+				"styles/jqueryupload.css"
+			],
 			"scripts": [
 				"blueimp/JavaScript-Templates/tmpl.min.js",
 				"blueimp/JavaScript-Load-Image/load-image.min.js",
@@ -50,12 +70,15 @@
 				"upload/js/cors/jquery.xdr-transport.js",
 				"modules/jqueryupload.js"
 			],
-			"dependencies": ["mediawiki.util", "jquery.ui"]
+			"dependencies": [
+				"mediawiki.util",
+				"jquery.ui"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "",
 		"remoteExtPath": "jQueryUpload"
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }
