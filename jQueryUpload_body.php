@@ -82,7 +82,9 @@ class jQueryUpload {
 		}
 		if ( $attach ) {
 			$this->head();
-			$wgHooks['BeforePageDisplay'][] = $this;
+
+			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+			$hookContainer->register( 'BeforePageDisplay', $this );
 		}
 
 		// Add the extensions own js and css
