@@ -110,6 +110,13 @@ class UploadHandler
             scandir($this->options['upload_dir'])
         )));
     }
+    
+    protected function imagecreatetruecolor( $width, $height ) {
+		if ( !function_exists( 'imagecreatetruecolor' ) ) {
+			return false;
+		}
+		return @imagecreatetruecolor($width, $height);
+	}
 
     protected function create_scaled_image($file_name, $options) {
         $file_path = $this->options['upload_dir'].$file_name;
@@ -130,7 +137,12 @@ class UploadHandler
         }
         $new_width = $img_width * $scale;
         $new_height = $img_height * $scale;
-        $new_img = @imagecreatetruecolor($new_width, $new_height);
+        $new_img = $this->imagecreatetruecolor($new_width, $new_height);
+        
+        if ( !$new_img ) {
+        	return false;
+        }
+        
         switch (strtolower(substr(strrchr($file_name, '.'), 1))) {
             case 'jpg':
             case 'jpeg':
