@@ -20,8 +20,8 @@ $(function() {
 	'use strict';
 	
 	// @see https://github.com/blueimp/jQuery-File-Upload/wiki/How-to-submit-additional-form-data
-	$('#fileupload').bind('fileuploadsubmit', function (e, data) {
-		data.formData = { action: 'jqu' };
+    $('#fileupload').bind('fileuploadsubmit', function (e, data) {
+		data.formData = {action: 'jqu'};
 	});
 
 
