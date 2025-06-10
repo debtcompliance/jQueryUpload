@@ -25,10 +25,7 @@ class jQueryUpload {
 	public static $action = null;
 
 	public static function onRegistration() {
-		global $wgAPIModules, $wgJQUaction;
-
-		// Register our API Ajax handler
-		$wgAPIModules['jqu'] = 'MediaWiki\\Extension\\jQueryUpload\\Api\\ApijQueryUpload';
+		global $wgJQUaction;
 
 		// Create a singleton instance
 		self::$instance = new self();
@@ -45,8 +42,7 @@ class jQueryUpload {
 	 *	Using this hook for setup so that user and title are setup
 	 */
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgHooks, $wgJQUploadFileMagic, $wgExtensionAssetsPath,
-			$wgAvailableRights, $wgGroupPermissions, $wgGrantPermissions;
+		global $wgJQUploadFileMagic, $wgExtensionAssetsPath, $wgAvailableRights;
 
 		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 

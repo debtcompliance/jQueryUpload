@@ -17,8 +17,6 @@ class ApijQueryUpload extends ApiBase {
 	public function execute() {
 		global $wgScriptPath, $wgUploadDirectory, $wgFileExtensions;
 
-		var_dump( $wgFileExtensions );
-
 		$params = $this->extractRequestParams();
 		$thumb = $params['thumb'];
 		$path = $params['path'];
@@ -163,17 +161,24 @@ class ApijQueryUpload extends ApiBase {
 		return new ApiFormatFile( $this->getMain(), $this->getMain()->createPrinterByName( 'jsonfm' ) );
 	}
 
-	public function mustBePosted() {
+	/**
+	 * @inheritDoc
+	 */
+	public function mustBePosted(): bool {
 		return false;
 	}
 
 	/**
-	 * Just allow any params for now (by adding the keys in $_REQUEST to the allowed params)
+	 * @inheritDoc
 	 */
-	public function getAllowedParams() {
-		foreach ( array_keys( $_REQUEST ) as $k ) {
-			$params[$k] = [ ParamValidator::PARAM_TYPE => 'string' ];
-		}
+	public function isInternal(): bool {
+		return true;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getAllowedParams(): array {
 		$params['thumb'] = [ ParamValidator::PARAM_TYPE => 'boolean' ];
 		$params['path'] = [ ParamValidator::PARAM_TYPE => 'string' ];
 		$params['name'] = [ ParamValidator::PARAM_TYPE => 'string' ];
