@@ -24,6 +24,9 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\jQueryUpload\\": "includes/"
 	},
+	"APIModules": {
+		"jqu": "MediaWiki\\Extension\\jQueryUpload\\Api\\ApijQueryUpload"
+	},
 	"Hooks": {
 		"LanguageGetMagic": "MediaWiki\\Extension\\jQueryUpload\\jQueryUpload::onLanguageGetMagic"
 	},
@@ -47,7 +50,8 @@
 	},
 	"MessagesDirs": {
 		"jQueryUpload": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
 	"ResourceModules": {

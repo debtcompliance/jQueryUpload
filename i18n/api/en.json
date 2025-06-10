@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"apihelp-jqu-summary": "Used by the jQueryUpload extension internally.",
+	"apihelp-jqu-param-thumb": "Whether to return the thumbnail of the file.",
+	"apihelp-jqu-param-path": "The path to the file. This is typically the article ID.",
+	"apihelp-jqu-param-name": "The name of the file."
+}
