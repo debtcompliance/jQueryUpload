@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -19,8 +20,6 @@ class jQueryUpload {
 	public static $desc = [];
 	public static $instance = null;
 	public static $action = null;
-	public static $canUpload = false;
-	public static $canDelete = false;
 
 	public static function onRegistration() {
 		global $wgAPIModules, $wgJQUaction;
@@ -89,25 +88,20 @@ class jQueryUpload {
 
 		// Add the extensions own js and css
 		$out->addModules( [ 'ext.jqueryupload' ] );
-		$out->addModuleStyles( [ 'ext.jqueryupload' ] );
-
-		// Initialize actions permissions
-		if ( $user->isAllowed( 'jquupload' ) ) {
-			self::$canUpload = true;
-		}
-
-		if ( $user->isAllowed( 'jqudelete' ) ) {
-			self::$canDelete = true;
-		}
 	}
 
 	/**
 	 * Render scripts and form into an article
 	 */
 	public function onBeforePageDisplay( $out, $skin ) {
+		$user = $out->getUser();
+
+		$canUpload = $user->isAllowed( 'jquupload' );
+		$canDelete = $user->isAllowed( 'jqudelete' );
+
 		$out->addHtml( '<h2 class="jqueryupload">' . wfMessage( 'jqueryupload-attachments' )->text() . '</h2>' );
-		$out->addHtml( $this->form() );
-		$out->addHtml( $this->templates() );
+		$out->addHtml( $this->form( $canUpload, $canDelete ) );
+		$out->addHtml( $this->templates( $canDelete ) );
 		return true;
 	}
 
@@ -152,7 +146,7 @@ class jQueryUpload {
 		}
 
 		// Check if the file is a locally uploaded one
-		$img = wfLocalFile( $filename );
+		$img = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo()->findFile( $filename );
 		if ( $img->exists() ) {
 			$href = $img->getUrl();
 			$class = ' local-file';
@@ -239,7 +233,7 @@ class jQueryUpload {
 		$out->addJsConfigVars( 'jQueryUploadID', $this->id );
 	}
 
-	private function form() {
+	private function form( bool $canUpload, bool $canDelete ): string {
 		global $wgScriptPath;
 
 		$title = RequestContext::getMain()->getTitle();
@@ -252,7 +246,7 @@ class jQueryUpload {
 			? "<input type=\"hidden\" name=\"path\" value=\"{$this->id}\" />"
 			: '';
 		$html = '<form id="fileupload" action="' . $wgScriptPath . '/api.php" method="POST" enctype="multipart/form-data">';
-		if ( self::$canUpload ) {
+		if ( $canUpload ) {
 			$html .= '<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
 			<div class="row fileupload-buttonbar">
 				<div class="span7">
@@ -274,7 +268,7 @@ class jQueryUpload {
 						<span>' . wfMessage( 'jqueryupload-cancel' ) . '</span>
 					</button>';
 
-		if ( self::$canDelete ) {
+		if ( $canDelete ) {
 			$html .= '
 					<button type="button" class="btn btn-danger delete">
 						<i class="icon-trash icon-white"></i>
@@ -306,7 +300,7 @@ class jQueryUpload {
 		return $html;
 	}
 
-	private function templates() {
+	private function templates( bool $canDelete ): string {
 		$html = '<!-- The template to display files available for upload -->
 		<script id="template-upload" type="text/x-tmpl">
 		{% for (var i=0, file; file=o.files[i]; i++) { %}
@@ -364,7 +358,7 @@ class jQueryUpload {
 					<td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
 					<td colspan="2"></td>
 				{% } %}';
-		if ( self::$canDelete ) {
+		if ( $canDelete ) {
 			$html .= '<td class="delete">
 						<button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
 							<i class="icon-trash icon-white"></i>

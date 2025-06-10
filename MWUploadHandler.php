@@ -1,6 +1,9 @@
 <?php
 
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use UploadHandler;
 
 /**
  * A modified version of the Blueimp UploadHandler class
@@ -12,7 +15,7 @@ class MWUploadHandler extends UploadHandler {
 	 * if the script URL already has a query-string and to add path info
 	 */
 	protected function set_file_delete_url( $file ) {
-		if ( jQueryUpload::$canDelete ) {
+		if ( RequestContext::getMain()->getUser()->isAllowed( 'jqudelete' ) ) {
 			$path = preg_match( '|jquery_upload_files/(.+)/|', $this->options['upload_dir'], $m )
 				? "&path=$m[1]"
 				: '';
@@ -82,14 +85,17 @@ class MWUploadHandler extends UploadHandler {
 	 * Render file data
 	 */
 	public static function renderData( $data ) {
-		$user = User::newFromID( $data[0] );
+		$services = MediaWikiServices::getInstance();
+		$context = RequestContext::getMain();
+
+		$user = $services->getUserFactory()->newFromId( $data[0] );
 		$name = $user->getRealName();
 		if ( empty( $name ) ) {
 			$name = $user->getName();
 		}
-		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
-		$d = $contLang->userDate( $data[1], RequestContext::getMain()->getUser() );
-		$t = $contLang->userTime( $data[1], RequestContext::getMain()->getUser() );
+		$contLang = $services->getContentLanguage();
+		$d = $contLang->userDate( $data[1], $context->getUser() );
+		$t = $contLang->userTime( $data[1], $context->getUser() );
 		return wfMessage( 'jqueryupload-uploadinfo', $name, $d, $t )->text();
 	}
 
@@ -99,7 +105,7 @@ class MWUploadHandler extends UploadHandler {
 	public static function getUploadedFileInfo( $title ) {
 		$article = new Article( $title );
 		$desc = $article->getPage()->getContent()->getNativeData();
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
 		$row = $dbr->selectRow(
 			'revision',
 			[ 'rev_actor', 'rev_timestamp' ],
@@ -117,7 +123,7 @@ class MWUploadHandler extends UploadHandler {
 	 * We should remove the unused directory after deleting a file
 	 */
 	public function delete() {
-		if ( jQueryUpload::$canDelete ) {
+		if ( RequestContext::getMain()->getUser()->isAllowed( 'jqudelete' ) ) {
 			parent::delete();
 			$dir = $this->options['upload_dir'];
 

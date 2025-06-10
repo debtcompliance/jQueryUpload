@@ -1,6 +1,6 @@
 {
 	"name": "jQueryUpload",
-	"version": "2.0.0",
+	"version": "3.0.0-alpha",
 	"license-name": "GPL-2.0-or-later",
 	"author": [
 		"[https://organicdesign.nz/User:Nad Aran Dunkley]",
@@ -12,7 +12,7 @@
 	"descriptionmsg": "jqueryupload-desc",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.39.0",
+		"MediaWiki": ">= 1.43.0",
 		"platform": {
 			"php": ">= 8.0"
 		}

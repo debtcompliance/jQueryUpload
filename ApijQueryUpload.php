@@ -1,4 +1,9 @@
 <?php
+
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Context\RequestContext;
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * API module for jQueryUpload extension
  * @ingroup API
@@ -7,6 +12,9 @@ class ApijQueryUpload extends ApiBase {
 
 	public function execute() {
 		global $wgScriptPath, $wgUploadDirectory, $wgFileExtensions;
+
+		var_dump( $wgFileExtensions );
+
 		$params = $this->extractRequestParams();
 		$thumb = $params['thumb'];
 		$path = $params['path'];
@@ -160,11 +168,11 @@ class ApijQueryUpload extends ApiBase {
 	 */
 	public function getAllowedParams() {
 		foreach ( array_keys( $_REQUEST ) as $k ) {
-			$params[$k] = [ ApiBase::PARAM_TYPE => 'string' ];
+			$params[$k] = [ ParamValidator::PARAM_TYPE => 'string' ];
 		}
-		$params['thumb'] = [ ApiBase::PARAM_TYPE => 'boolean' ];
-		$params['path'] = [ ApiBase::PARAM_TYPE => 'string' ];
-		$params['name'] = [ ApiBase::PARAM_TYPE => 'string' ];
+		$params['thumb'] = [ ParamValidator::PARAM_TYPE => 'boolean' ];
+		$params['path'] = [ ParamValidator::PARAM_TYPE => 'string' ];
+		$params['name'] = [ ParamValidator::PARAM_TYPE => 'string' ];
 		return $params;
 	}
 }
