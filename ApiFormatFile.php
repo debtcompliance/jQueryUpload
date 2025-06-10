@@ -1,4 +1,9 @@
 <?php
+
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiFormatBase;
+
 /**
  * An API format based on ApiFormatRaw that outputs a file if a filename is set, text if not
  * - Later the file output can have web-server support like Apache's XSendFile module added
