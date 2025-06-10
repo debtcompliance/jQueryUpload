@@ -1,5 +1,8 @@
 <?php
 
+namespace MediaWiki\Extension\jQueryUpload;
+
+use Article;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;

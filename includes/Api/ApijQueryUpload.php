@@ -1,7 +1,11 @@
 <?php
 
+namespace MediaWiki\Extension\jQueryUpload\Api;
+
 use MediaWiki\Api\ApiBase;
 use MediaWiki\Context\RequestContext;
+use MediaWiki\Extension\jQueryUpload\jQueryUpload;
+use MediaWiki\Extension\jQueryUpload\MWUploadHandler;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**

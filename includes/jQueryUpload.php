@@ -1,5 +1,8 @@
 <?php
 
+namespace MediaWiki\Extension\jQueryUpload;
+
+use Article;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 
@@ -25,7 +28,7 @@ class jQueryUpload {
 		global $wgAPIModules, $wgJQUaction;
 
 		// Register our API Ajax handler
-		$wgAPIModules['jqu'] = 'ApijQueryUpload';
+		$wgAPIModules['jqu'] = 'MediaWiki\\Extension\\jQueryUpload\\Api\\ApijQueryUpload';
 
 		// Create a singleton instance
 		self::$instance = new self();

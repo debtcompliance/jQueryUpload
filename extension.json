@@ -17,16 +17,15 @@
 			"php": ">= 8.0"
 		}
 	},
-	"callback": "jQueryUpload::onRegistration",
+	"callback": "MediaWiki\\Extension\\jQueryUpload\\jQueryUpload::onRegistration",
 	"AutoloadClasses": {
-		"jQueryUpload": "jQueryUpload_body.php",
-		"ApijQueryUpload": "ApijQueryUpload.php",
-		"ApiFormatFile": "ApiFormatFile.php",
-		"UploadHandler": "upload/server/php/upload.class.php",
-		"MWUploadHandler": "MWUploadHandler.php"
+		"UploadHandler": "upload/server/php/upload.class.php"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\jQueryUpload\\": "includes/"
 	},
 	"Hooks": {
-		"LanguageGetMagic": "jQueryUpload::onLanguageGetMagic"
+		"LanguageGetMagic": "MediaWiki\\Extension\\jQueryUpload\\jQueryUpload::onLanguageGetMagic"
 	},
 	"config": {
 		"JQUploadIconPrefix": {
@@ -44,7 +43,7 @@
 	},
 	"ExtensionMessagesFiles": {
 		"jQueryUploadAlias": "jQueryUpload.alias.php",
-		"jQueryUploadMagic": "jQueryUpload.i18n.magic.php"
+		"jQueryUploadMagic": "jQueryUpload.magic.php"
 	},
 	"MessagesDirs": {
 		"jQueryUpload": [
