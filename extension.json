@@ -27,6 +27,10 @@
 	"APIModules": {
 		"jqu": "MediaWiki\\Extension\\jQueryUpload\\Api\\ApijQueryUpload"
 	},
+	"AvailableRights": {
+		"jquupload": "jquupload",
+		"jqudelete": "jqudelete"
+	},
 	"Hooks": {
 		"LanguageGetMagic": "MediaWiki\\Extension\\jQueryUpload\\jQueryUpload::onLanguageGetMagic"
 	},

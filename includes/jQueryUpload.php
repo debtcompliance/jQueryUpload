@@ -42,7 +42,7 @@ class jQueryUpload {
 	 *	Using this hook for setup so that user and title are setup
 	 */
 	public function onUserGetRights( $user, &$rights ) {
-		global $wgJQUploadFileMagic, $wgExtensionAssetsPath, $wgAvailableRights;
+		global $wgJQUploadFileMagic, $wgExtensionAssetsPath;
 
 		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 
@@ -51,10 +51,6 @@ class jQueryUpload {
 
 		// Calculate the base path of the extension files accounting for symlinks
 		self::$path = "$wgExtensionAssetsPath/jQueryUpload";
-
-		// Introduce new rights for uploading and deleting upload
-		$wgAvailableRights[] = 'jquupload';
-		$wgAvailableRights[] = 'jqudelete';
 
 		// If attachments allowed in this page, add the module into the page
 		if ( is_object( $title ) ) {
