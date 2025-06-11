@@ -106,9 +106,11 @@ class MWUploadHandler extends UploadHandler {
 	 * Get the description, name and upload time of the passed wiki file
 	 */
 	public static function getUploadedFileInfo( $title ) {
+		$services = MediaWikiServices::getInstance();
+
 		$article = new Article( $title );
 		$desc = $article->getPage()->getContent()->getNativeData();
-		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
+		$dbr = $services->getConnectionProvider()->getReplicaDatabase();
 		$row = $dbr->selectRow(
 			'revision',
 			[ 'rev_actor', 'rev_timestamp' ],
@@ -117,7 +119,7 @@ class MWUploadHandler extends UploadHandler {
 			[ 'ORDER BY' => 'rev_timestamp','LIMIT' => 1 ]
 		);
 
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $row->rev_actor );
+		$user = $services->getUserFactory()->newFromActorId( $row->rev_actor );
 
 		return [ $user->getId(), $row->rev_timestamp, $desc ];
 	}
@@ -159,6 +161,7 @@ class MWUploadHandler extends UploadHandler {
 	 */
 	protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ) {
 		$file = parent::handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index );
+
 		if ( is_object( $file ) ) {
 			$file_path = $this->options['upload_dir'] . $file->name;
 			if ( is_file( $file_path ) ) {
